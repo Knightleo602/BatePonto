@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BatePonto</string>
+    <string name="time_worked">Trabalhado: %s</string>
+    <string name="config">Configuracões</string>
 </resources>

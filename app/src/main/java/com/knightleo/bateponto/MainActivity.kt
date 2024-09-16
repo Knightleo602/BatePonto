@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,147 +21,237 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.knightleo.bateponto.data.DatabaseHolder
+import com.knightleo.bateponto.data.entity.Date
+import com.knightleo.bateponto.data.entity.DayTimeMark
+import com.knightleo.bateponto.data.entity.Time
+import com.knightleo.bateponto.ui.MarkState
+import com.knightleo.bateponto.ui.ViewModel
+import com.knightleo.bateponto.ui.condition
 import com.knightleo.bateponto.ui.theme.BatePontoTheme
-import kotlinx.coroutines.launch
-import java.io.File
 
 class MainActivity : ComponentActivity() {
+
+    private val db by DatabaseHolder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val timeMarker = TimeMarker(File(filesDir, FILE_NAME))
         enableEdgeToEdge()
         setContent {
-            val coroutine = rememberCoroutineScope()
-            var breakPoints: BreakPoints by remember { mutableStateOf(timeMarker.readPreviousEntries()) }
-            val lazyListState = rememberLazyListState()
+            val viewModel = ViewModel(db.dayMarkDao())
+            val state by viewModel.markState.collectAsStateWithLifecycle()
             BatePontoTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    floatingActionButton = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            FloatingActionButton(
-                                onClick = {
-                                    timeMarker.saveCurrentTime()
-                                    breakPoints = timeMarker.readPreviousEntries()
-                                    coroutine.launch {
-                                        lazyListState.animateScrollToItem(breakPoints.lastIndex)
-                                    }
-                                },
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.baseline_add_24),
-                                    contentDescription = null
-                                )
-                            }
-                            FloatingActionButton(
-                                onClick = {
-                                    timeMarker.reset()
-                                    breakPoints = timeMarker.readPreviousEntries()
-                                },
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.baseline_delete_24),
-                                    contentDescription = null
-                                )
-                            }
-                        }
+                Content(
+                    state,
+                    onAdd = viewModel::addNewMark,
+                    onTimeDelete = viewModel::deleteTime,
+                    onDayDelete = viewModel::deleteDay
+                )
+            }
+        }
+    }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Content(
+    state: MarkState,
+    onAdd: () -> Unit,
+    onDayDelete: (Date) -> Unit,
+    onTimeDelete: (Time, Date) -> Unit
+) {
+    var selectedDate: Date? by remember { mutableStateOf(null) }
+    var selectedTime: Time? by remember { mutableStateOf(null) }
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                selectedTime = null
+                selectedDate = null
+            },
+        floatingActionButton = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        if(selectedTime == null && selectedDate == null) {
+                            onAdd()
+                        } else {
+                            selectedDate = null
+                            selectedTime = null
+                        }
                     },
-                    floatingActionButtonPosition = FabPosition.Center
-                ) { innerPadding ->
-                    Column(
-                        modifier = Modifier.padding(innerPadding)
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_add_24),
+                        contentDescription = null
+                    )
+                }
+                if(selectedDate != null) {
+                    FloatingActionButton(
+                        onClick = {
+                            if(selectedTime == null) onDayDelete(selectedDate!!)
+                            else {
+                                onTimeDelete(selectedTime!!, selectedDate!!)
+                                selectedTime = null
+                            }
+                            selectedDate = null
+                        },
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
                     ) {
-                        Greeting()
-                        BreakPointsList(breakPoints, modifier = Modifier.fillMaxSize())
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_delete_24),
+                            contentDescription = null
+                        )
                     }
                 }
             }
-        }
+        },
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.app_name)) },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_settings_24),
+                            contentDescription = stringResource(R.string.config)
+                        )
+                    }
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Center
+    ) { innerPadding ->
+        MarksList(
+            state.marks.mapIndexed { index, dayTimeMark -> dayTimeMark to state.sums[index] },
+            selectedDate,
+            selectedTime,
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            onSelectTime = { selectedTime = it },
+            onSelectDay = { selectedDate = it },
+        )
     }
 }
 
 @Composable
-fun DialogContent(
-    showDialog: Boolean,
-    breakPoints: BreakPoints,
-    onDismiss: () -> Unit
-) {
-    if(showDialog) {
-        Dialog(
-            onDismissRequest = onDismiss
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-            ) {
-                BreakPointsList(breakPoints)
-            }
-        }
-    }
-}
-
-@Composable
-fun BreakPointsList(
-    breakPoints: BreakPoints,
+fun MarksList(
+    dayMarks: List<Pair<DayTimeMark, Time?>>,
+    selectedDay: Date?,
+    selectedTime: Time?,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
+    onSelectDay: (Date) -> Unit,
+    onSelectTime: (Time?) -> Unit
 ) {
     LazyColumn(
         state = lazyListState,
-        modifier = Modifier.padding(top = 10.dp).then(modifier),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(breakPoints) { dateItem ->
-            Text(
-                text = dateItem.first.formatted,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+        items(dayMarks) { dayTimeMark ->
             Column (
-                modifier = Modifier.padding(top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .padding(horizontal = 15.dp)
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                dateItem.second.forEach { timeItem ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                        .clip(shape = RoundedCornerShape(16.dp))
+                        .clickable {
+                            onSelectDay(dayTimeMark.first.dayMark.date)
+                            onSelectTime(null)
+                        }
+                        .condition(selectedDay == dayTimeMark.first.dayMark.date) {
+                            it.background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        }
+                        .padding(vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = timeItem.formatted,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        text = dayTimeMark.first.dayMark.date.formatted,
+                        style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center
                     )
+                    if(dayTimeMark.second != null) {
+                        Text(
+                            text = stringResource(R.string.time_worked, dayTimeMark.second!!.formatted),
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp)
+                        .padding(bottom = 10.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+                dayTimeMark.first.times.forEach { timeItem ->
+                    Text(
+                        text = timeItem.time.formatted,
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .clip(shape = RoundedCornerShape(16.dp))
+                            .condition(selectedTime == timeItem.time) {
+                                it.background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            }
+                            .clickable {
+                                onSelectDay(timeItem.date)
+                                onSelectTime(timeItem.time)
+                            }
+                            .padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
         item { Spacer(modifier = Modifier.height(70.dp)) }
@@ -165,29 +259,12 @@ fun BreakPointsList(
 }
 
 @Composable
-fun Buttons(
-    onMarkNewTime: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        Button(
-            onClick = onMarkNewTime,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Bater Ponto")
-        }
-    }
-}
-
-@Composable
-fun Greeting(modifier: Modifier = Modifier) {
+fun Title(modifier: Modifier = Modifier) {
     Text(
         text = "Bate ponto",
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 15.dp),
         textAlign = TextAlign.Center
     )
 }
