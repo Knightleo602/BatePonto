@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.ui.theme
+package com.knightleo.bateponto
 
 import android.app.Application
 import io.github.aakira.napier.DebugAntilog

@@ -3,18 +3,18 @@ package com.knightleo.bateponto.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.knightleo.bateponto.data.DayMarkDAO
-import com.knightleo.bateponto.data.entity.Date
-import com.knightleo.bateponto.data.entity.DayTimeMark
-import com.knightleo.bateponto.data.entity.Time
-import com.knightleo.bateponto.data.entity.currentDateAndTime
+import com.knightleo.bateponto.data.entity.User
+import com.knightleo.bateponto.data.entity.WorkTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.OffsetDateTime
+import java.time.OffsetTime
 
 data class MarkState(
-    val marks: List<DayTimeMark> = emptyList(),
-    val sums: List<Time?> = emptyList()
+    val marks: List<Pair<Pair<OffsetDateTime, Duration>, List<OffsetTime>>> = emptyList()
 )
 
 class ViewModel(
@@ -22,6 +22,7 @@ class ViewModel(
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
+    private var user: User = User(0, "")
     val markState: StateFlow<MarkState> get() = _markState
 
     init {
@@ -31,30 +32,33 @@ class ViewModel(
     }
 
     private suspend fun loadMarks() {
-        val marks = dayMarkDAO.getAll()
-        val sums = MutableList(marks.size) { dayMarkDAO.sumTimeSpentOnDay(marks[it]) }
+        user = dayMarkDAO.getUser() ?: kotlin.run {
+            val id = dayMarkDAO.createUser(User(0, "Bob"))
+            dayMarkDAO.getUser(id.toInt())
+        }
+        val marks = dayMarkDAO.getAllUserTimes(user.id)
+        val sums = MutableList(marks.workTimes.size) { dayMarkDAO.timeSpentInDay(user.id, marks.workTimes[it].day) }
         _markState.update {
-            it.copy(marks = marks, sums = sums)
+            it.copy(marks = marks.workTimes.mapIndexed { index, wt ->  (wt.day to sums[index]) to wt.times })
         }
     }
 
     fun addNewMark() = viewModelScope.launch {
-        val (date, time) = currentDateAndTime()
-        dayMarkDAO.insertTime(time, date)
+        dayMarkDAO.insertCurrentTimeStamp(user.id)
         loadMarks()
     }
 
-    fun deleteDay(date: Date) = viewModelScope.launch {
-        dayMarkDAO.deleteDay(date)
+    fun deleteDay(date: WorkTime) = viewModelScope.launch {
+        dayMarkDAO.deleteTimesInDay(user.id, date.timeStamp)
         loadMarks()
     }
 
-    fun deleteTime(time: Time, day: Date) = viewModelScope.launch {
-        dayMarkDAO.deleteTime(time, day)
+    fun deleteTime(time: WorkTime) = viewModelScope.launch {
+        dayMarkDAO.deleteWorkTime(user.id, time.timeStamp)
         loadMarks()
     }
 
-    fun sumOfDay(date: Date) = viewModelScope.launch {
-        dayMarkDAO.sumTimeSpentOnDay(date)
+    fun sumOfDay(date: WorkTime) = viewModelScope.launch {
+        dayMarkDAO.timeSpentInDay(user.id, date.timeStamp)
     }
 }

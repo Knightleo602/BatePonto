@@ -4,15 +4,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.knightleo.bateponto.data.entity.DateConverters
-import com.knightleo.bateponto.data.entity.DayMark
-import com.knightleo.bateponto.data.entity.TimeConverter
-import com.knightleo.bateponto.data.entity.TimeMark
+import com.knightleo.bateponto.data.entity.User
+import com.knightleo.bateponto.data.entity.WorkTime
 import kotlin.reflect.KProperty
 
-@Database(entities = [DayMark::class, TimeMark::class], version = 1)
-@TypeConverters(DateConverters::class, TimeConverter::class)
+@Database(entities = [User::class, WorkTime::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun dayMarkDao(): DayMarkDAO
 }

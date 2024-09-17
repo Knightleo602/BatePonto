@@ -39,15 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.data.DatabaseHolder
+import com.knightleo.bateponto.data.entity.DailyMarks
 import com.knightleo.bateponto.data.entity.Date
-import com.knightleo.bateponto.data.entity.DayTimeMark
 import com.knightleo.bateponto.data.entity.Time
 import com.knightleo.bateponto.ui.MarkState
 import com.knightleo.bateponto.ui.ViewModel
@@ -142,7 +141,7 @@ fun Content(
         },
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name)) },
+                title = { Text(text = "") },
                 actions = {
                     IconButton(onClick = {}) {
                         Icon(
@@ -159,7 +158,9 @@ fun Content(
             state.marks.mapIndexed { index, dayTimeMark -> dayTimeMark to state.sums[index] },
             selectedDate,
             selectedTime,
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             onSelectTime = { selectedTime = it },
             onSelectDay = { selectedDate = it },
         )
@@ -168,7 +169,7 @@ fun Content(
 
 @Composable
 fun MarksList(
-    dayMarks: List<Pair<DayTimeMark, Time?>>,
+    dayMarks: List<Pair<DailyMarks, Time?>>,
     selectedDay: Date?,
     selectedTime: Time?,
     modifier: Modifier = Modifier,
@@ -205,17 +206,17 @@ fun MarksList(
                         .padding(horizontal = 15.dp, vertical = 10.dp)
                         .clip(shape = RoundedCornerShape(16.dp))
                         .clickable {
-                            onSelectDay(dayTimeMark.first.dayMark.date)
+                            onSelectDay(dayTimeMark.first.date.date)
                             onSelectTime(null)
                         }
-                        .condition(selectedDay == dayTimeMark.first.dayMark.date) {
+                        .condition(selectedDay == dayTimeMark.first.date.date) {
                             it.background(MaterialTheme.colorScheme.surfaceContainerHighest)
                         }
                         .padding(vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = dayTimeMark.first.dayMark.date.formatted,
+                        text = "${dayTimeMark.first.date.date.formatted} - ${dayTimeMark.first.date.weekDayName}",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center
                     )
@@ -256,15 +257,4 @@ fun MarksList(
         }
         item { Spacer(modifier = Modifier.height(70.dp)) }
     }
-}
-
-@Composable
-fun Title(modifier: Modifier = Modifier) {
-    Text(
-        text = "Bate ponto",
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 15.dp),
-        textAlign = TextAlign.Center
-    )
 }
