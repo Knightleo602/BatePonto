@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BatePonto</string>
+    <string name="time_worked">Worked: %s</string>
+    <string name="config">Settings</string>
+    <string name="delete_day_prompt_title">Delete</string>
+    <string name="delete_day_prompt_description">Are you sure you want to delete %s?</string>
+    <string name="list_screen_title">Hours</string>
+</resources>

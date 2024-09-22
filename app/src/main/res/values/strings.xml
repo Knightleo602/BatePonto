@@ -2,4 +2,7 @@
     <string name="app_name">BatePonto</string>
     <string name="time_worked">Trabalhado: %s</string>
     <string name="config">Configuracões</string>
+    <string name="delete_day_prompt_title">Excluir</string>
+    <string name="list_screen_title">Horas</string>
+    <string name="delete_day_prompt_description">Você tem certeza que gostaria de excluir o dia %s?</string>
 </resources>

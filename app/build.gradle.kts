@@ -66,6 +66,10 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
+    
+    implementation(platform(libs.koin.bom))
+    implementation(libs.bundles.koin)
+
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
