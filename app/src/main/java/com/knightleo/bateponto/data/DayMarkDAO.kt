@@ -21,7 +21,7 @@ import java.time.OffsetTime
 abstract class DayMarkDAO {
 
     @Transaction
-    @Query("SELECT * FROM DayMark WHERE userId=:userId AND date(day) BETWEEN date(:from) AND date(:to)")
+    @Query("SELECT * FROM DayMark WHERE userId=:userId AND day BETWEEN :from AND :to")
     abstract suspend fun getDaysBetween(
         userId: Int,
         from: Day,
@@ -43,6 +43,9 @@ abstract class DayMarkDAO {
 
     @Query("UPDATE TimeMark SET timeStamp=:newTime WHERE timeStamp=:oldTime AND day=:day")
     abstract suspend fun updateTime(oldTime: OffsetTime, newTime: OffsetTime, day: Day)
+
+    @Query("UPDATE DayMark SET day=:newDate WHERE day=:oldDate AND userId=:userId")
+    abstract suspend fun updateDate(userId: Int, oldDate: Day, newDate: Day)
 
     @Transaction
     open suspend fun deleteTimeFromDay(userId: Int, vararg timeMark: TimeMark) {
@@ -74,9 +77,8 @@ abstract class DayMarkDAO {
 
     @Transaction
     open suspend fun currentWeekDays(userId: Int): List<DayMarks> {
-        val now = OffsetDateTime.now()
-        val startOfWeek = now.minusDays(now.dayOfWeek.ordinal.toLong())
-        return getDaysBetween(userId, startOfWeek.asDay(), now.asDay())
+        val (start, now) = currentWeekRange()
+        return getDaysBetween(userId, start, now)
     }
 
     @Transaction

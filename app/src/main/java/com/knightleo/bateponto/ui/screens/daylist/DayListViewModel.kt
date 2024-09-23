@@ -3,6 +3,7 @@ package com.knightleo.bateponto.ui.screens.daylist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.knightleo.bateponto.data.DayMarkDAO
+import com.knightleo.bateponto.data.currentWeekRange
 import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.TimeMark
@@ -19,9 +20,11 @@ import java.time.OffsetTime
 typealias DayWorked = Pair<DayAndDurationWorked, List<OffsetTime>>
 typealias DayAndDurationWorked = Pair<Day, Duration>
 typealias DaysAndTimesWorked = List<DayWorked>
+typealias Week = Pair<Day, Day>
 
 data class MarkState(
-    val marks: DaysAndTimesWorked = emptyList()
+    val marks: DaysAndTimesWorked = emptyList(),
+    val selectedWeek: Week = Day() to Day()
 )
 
 class DayListViewModel(
@@ -29,11 +32,18 @@ class DayListViewModel(
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
-    private var user: User = User(0, "")
+    var user: User = User(0, "")
+        private set
     val markState: StateFlow<MarkState> get() = _markState
 
     init {
-        coroutineLaunch { loadMarks() }
+        coroutineLaunch {
+            user = dayMarkDAO.getUser() ?: kotlin.run {
+                val id = dayMarkDAO.createUser(User(0, "Bob"))
+                dayMarkDAO.getUser(id.toInt())
+            }
+            loadMarks()
+        }
     }
 
     private inline fun coroutineLaunch(
@@ -42,24 +52,22 @@ class DayListViewModel(
         viewModelScope.launch(Dispatchers.IO) { block() }
     }
 
-    private suspend fun loadMarks() {
-        user = dayMarkDAO.getUser() ?: kotlin.run {
-            val id = dayMarkDAO.createUser(User(0, "Bob"))
-            dayMarkDAO.getUser(id.toInt())
-        }
-        val marks = dayMarkDAO.getAllUserTimes(user.id)
-        val sums = MutableList(marks.workTimes.size) {
+    private suspend fun loadMarks(
+        week: Week = currentWeekRange()
+    ) {
+        val marks = dayMarkDAO.getDaysBetween(user.id, week.first, week.second)
+        val sums = MutableList(marks.size) {
             dayMarkDAO.timeSpentInDay(
                 user.id,
-                marks.workTimes[it].day
+                marks[it].dayMark.day
             )
         }
-        val times = marks.workTimes.mapIndexed { index, dayMarks ->
-            val times = dayMarkDAO.getWorkTimesInDay(user.id, dayMarks.day)
-            dayMarks.day to sums[index] to times.map { it.timeStamp }
+        val times = marks.mapIndexed { index, dayMarks ->
+            val times = dayMarkDAO.getWorkTimesInDay(user.id, dayMarks.dayMark.day)
+            dayMarks.dayMark.day to sums[index] to times.map { it.timeStamp }
         }
         _markState.update {
-            it.copy(marks = times)
+            it.copy(marks = times, selectedWeek = week)
         }
     }
 
@@ -91,4 +99,6 @@ class DayListViewModel(
         dayMarkDAO.updateTime(previousTime, newTime, date)
         loadMarks()
     }
+
+    fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week) }
 }

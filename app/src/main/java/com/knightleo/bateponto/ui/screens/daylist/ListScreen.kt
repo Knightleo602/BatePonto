@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,11 +32,13 @@ fun ListScreen(
     modifier: Modifier = Modifier,
     viewModel: DayListViewModel = koinViewModel()
 ) {
+    val localDensity = LocalDensity.current
     val state by viewModel.markState.collectAsStateWithLifecycle()
     var showDeleteDayDialog by remember { mutableStateOf(false) }
     var showUpdateTimeDialog by remember { mutableStateOf(false) }
     var selectedDate: Day? by remember { mutableStateOf(null) }
     var selectedTime: OffsetTime? by remember { mutableStateOf(null) }
+    var fabButtonsSize by remember { mutableStateOf(70.dp) }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +52,13 @@ fun ListScreen(
             .then(modifier),
         floatingActionButton = {
             ActionButtons(
-                modifier = Modifier.padding(horizontal = 15.dp),
+                modifier = Modifier
+                    .padding(horizontal = 15.dp)
+                    .onSizeChanged {
+                        with(localDensity) {
+                            fabButtonsSize = it.height.toDp() + 20.dp
+                        }
+                    },
                 onAddClick = viewModel::addNewMark,
                 showEditButton = selectedTime != null,
                 showDeleteButton = selectedDate != null,
@@ -70,6 +80,8 @@ fun ListScreen(
         floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->
         DaysList(
+            week = state.selectedWeek,
+            userName = viewModel.user.name,
             modifier = Modifier.padding(innerPadding),
             dayMarks = state.marks,
             onSelectTime = { day, time ->
@@ -80,6 +92,12 @@ fun ListScreen(
                 selectedDate = it
                 selectedTime = null
             },
+            onSelectWeek = {
+                viewModel.changeWeek(it)
+                selectedDate = null
+                selectedTime = null
+            },
+            bottomPadding = fabButtonsSize,
             selectedTime = selectedTime,
             selectedDay = selectedDate,
             onDayLongClick = {

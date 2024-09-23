@@ -6,4 +6,10 @@
     <string name="delete_day_prompt_title">Delete</string>
     <string name="delete_day_prompt_description">Are you sure you want to delete %s?</string>
     <string name="list_screen_title">Hours</string>
+    <string name="hello_user">Hello, %s.</string>
+    <string name="week">Week</string>
+    <string name="select_date">Select a date</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="week_range_format">%s to %s</string>
 </resources>

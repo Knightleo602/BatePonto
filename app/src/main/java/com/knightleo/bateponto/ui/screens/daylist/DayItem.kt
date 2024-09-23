@@ -3,7 +3,6 @@ package com.knightleo.bateponto.ui.screens.daylist
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,9 +42,7 @@ fun DayItem(
     val (day, times) = item
     Column(
         modifier = Modifier
-            .padding(top = 8.dp)
-            .padding(horizontal = 15.dp)
-            .fillMaxWidth()
+            .then(modifier)
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outline,
@@ -54,8 +51,7 @@ fun DayItem(
             .background(
                 MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp)
-            )
-            .then(modifier),
+            ),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -148,6 +144,7 @@ private fun TimeWorked(
                 onClick = { onSelect(time) },
                 onLongClick = { onLongClick(time) },
             )
+            .padding(horizontal = 20.dp)
             .padding(8.dp)
             .then(modifier)
     )
