@@ -2,7 +2,7 @@
 
 Aplicativo para Android para rapidamente bater ponto de trabalho.
 
-![image](images/app_screenshot.png)
+<img src="images/app_screenshot.png" alt="screenshot" width="300px"/>
 
 Funcionalidades:
 
