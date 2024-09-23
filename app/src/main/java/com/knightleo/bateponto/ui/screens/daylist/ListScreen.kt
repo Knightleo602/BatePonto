@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.R
+import com.knightleo.bateponto.data.currentWeekRange
 import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.ui.ActionButtons
 import com.knightleo.bateponto.ui.AppTopBar
@@ -51,6 +52,7 @@ fun ListScreen(
             }
             .then(modifier),
         floatingActionButton = {
+            val showAddButton = state.selectedWeek == currentWeekRange()
             ActionButtons(
                 modifier = Modifier
                     .padding(horizontal = 15.dp)
@@ -60,8 +62,9 @@ fun ListScreen(
                         }
                     },
                 onAddClick = viewModel::addNewMark,
-                showEditButton = selectedTime != null,
-                showDeleteButton = selectedDate != null,
+                showAddButton = showAddButton,
+                showEditButton = selectedTime != null && showAddButton,
+                showDeleteButton = selectedDate != null && showAddButton,
                 onEditClick = {
                     showUpdateTimeDialog = true
                 },

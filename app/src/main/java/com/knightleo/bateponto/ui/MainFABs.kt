@@ -69,7 +69,9 @@ fun ActionButtons(
                 }
             }
             AnimatedVisibility(
-                visible = showAddButton
+                visible = showAddButton,
+                enter = fadeIn() + slideInHorizontally { it },
+                exit = fadeOut() + slideOutHorizontally { it }
             ) {
                 FloatingActionButton(
                     onClick = onAddClick,
