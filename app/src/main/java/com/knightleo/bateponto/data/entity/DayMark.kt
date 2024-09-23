@@ -34,6 +34,9 @@ data class Day(
             year = year,
             day = dayOfMonth
         )
+
+        @JvmStatic
+        fun now() = OffsetDateTime.now().asDay()
     }
 }
 

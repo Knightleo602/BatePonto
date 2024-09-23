@@ -7,8 +7,9 @@ import java.time.OffsetDateTime
 
 fun currentWeekRange(): Pair<Day, Day> {
     val now = OffsetDateTime.now()
+    val endOfWeek = now.plusDays(6 - now.dayOfWeek.ordinal.toLong())
     val startOfWeek = now.minusDays(now.dayOfWeek.ordinal.toLong())
-    return startOfWeek.asDay() to now.asDay()
+    return startOfWeek.asDay() to endOfWeek.asDay()
 }
 
 fun Day.weekRange(): Pair<Day, Day> {

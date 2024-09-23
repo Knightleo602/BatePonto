@@ -73,12 +73,13 @@ fun ListScreen(
                     else {
                         viewModel.delete(selectedDate, selectedTime)
                         selectedTime = null
+                        selectedDate = null
                     }
                 }
             )
         },
         topBar = {
-            AppTopBar(currentPageTitle = stringResource(R.string.list_screen_title))
+            AppTopBar()
         },
         floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->

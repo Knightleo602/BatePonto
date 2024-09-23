@@ -25,11 +25,12 @@ fun OffsetTime.formattedTime(): String =
     format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
 fun Duration.formatted(): String {
-    val seconds = seconds.absoluteValue
-    return "%d:%02d".format(
-        seconds / 3600,
-        (seconds % 3600) / 60
+    val secondsAbs = seconds.absoluteValue
+    val v = "%d:%02d".format(
+        secondsAbs / 3600,
+        (secondsAbs % 3600) / 60
     )
+    return if (seconds < 0) "-$v" else v
 }
 
 fun hourAndMinuteToOffsetTime(hour: Int, minute: Int): OffsetTime = OffsetTime.of(
