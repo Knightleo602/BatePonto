@@ -17,7 +17,9 @@ data class Day(
     val month: Int = 0,
     val year: Int = 0
 ) : Parcelable {
-    override fun toString(): String = "$year-$month-$day"
+    override fun toString(): String = "$year-${month.toString().padStart(2, '0')}-${
+        day.toString().padStart(2, '0')
+    }"
 
     companion object {
         fun String.asDay(): Day {
