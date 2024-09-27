@@ -45,9 +45,9 @@ data class Day(
 @Entity(
     foreignKeys = [
         ForeignKey(
-            entity = User::class,
+            entity = Job::class,
             parentColumns = arrayOf("id"),
-            childColumns = arrayOf("userId"),
+            childColumns = arrayOf("jobId"),
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
@@ -55,7 +55,7 @@ data class Day(
 )
 data class DayMark(
     @PrimaryKey val day: Day,
-    @ColumnInfo(index = true) val userId: Int
+    @ColumnInfo(index = true) val jobId: Int
 )
 
 @Entity(
@@ -81,5 +81,4 @@ data class DayMarks(
         entityColumn = "day"
     )
     val times: List<TimeMark>
-
 )

@@ -1,9 +1,9 @@
 package com.knightleo.bateponto.ui.screens
 
-import com.knightleo.bateponto.ui.screens.daylist.DayListViewModel
+import com.knightleo.bateponto.ui.screens.home.HomeViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val screensModule = module {
-    viewModel { DayListViewModel(get()) }
+    viewModel { HomeViewModel(get(), get()) }
 }

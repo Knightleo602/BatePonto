@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.ui.screens.daylist
+package com.knightleo.bateponto.ui.screens.home
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text

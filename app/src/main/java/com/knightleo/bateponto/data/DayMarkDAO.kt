@@ -6,13 +6,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.data.entity.Day.Companion.asDay
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.DayMarks
+import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
-import com.knightleo.bateponto.data.entity.UserWorkTimes
+import com.knightleo.bateponto.data.entity.UserJobs
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.OffsetTime
@@ -21,16 +23,16 @@ import java.time.OffsetTime
 abstract class DayMarkDAO {
 
     @Transaction
-    @Query("SELECT * FROM DayMark WHERE userId=:userId AND day BETWEEN :from AND :to")
+    @Query("SELECT * FROM DayMark WHERE jobId=:jobId AND day BETWEEN :from AND :to")
     abstract suspend fun getDaysBetween(
-        userId: Int,
+        jobId: Int,
         from: Day,
         to: Day
     ): List<DayMarks>
 
     @Transaction
     @Query("SELECT * FROM User WHERE id=:userId")
-    abstract suspend fun getAllUserTimes(userId: Int): UserWorkTimes
+    abstract suspend fun getAllJobs(userId: Int): UserJobs
 
     @Delete
     abstract suspend fun deleteUser(user: User)
@@ -44,21 +46,36 @@ abstract class DayMarkDAO {
     @Query("UPDATE TimeMark SET timeStamp=:newTime WHERE timeStamp=:oldTime AND day=:day")
     abstract suspend fun updateTime(oldTime: OffsetTime, newTime: OffsetTime, day: Day)
 
-    @Query("UPDATE DayMark SET day=:newDate WHERE day=:oldDate AND userId=:userId")
-    abstract suspend fun updateDate(userId: Int, oldDate: Day, newDate: Day)
+    @Query("UPDATE DayMark SET day=:newDate WHERE day=:oldDate AND jobId=:jobId")
+    abstract suspend fun updateDate(jobId: Int, oldDate: Day, newDate: Day)
+
+    @Insert
+    abstract suspend fun insertNewJob(job: Job)
+
+    @Query("INSERT INTO Job (name, userId) VALUES (:name, :userId)")
+    abstract suspend fun insertNewJob(name: String, userId: Int)
+
+    @Query("SELECT * FROM Job WHERE id=:jobId")
+    abstract suspend fun getJob(jobId: Int): Job
+
+    @Query("DELETE FROM Job WHERE id=:jobId")
+    abstract suspend fun deleteJob(jobId: Int)
+
+    @Update
+    abstract suspend fun updateJob(jobId: Job)
 
     @Transaction
-    open suspend fun deleteTimeFromDay(userId: Int, vararg timeMark: TimeMark) {
+    open suspend fun deleteTimeFromDay(jobId: Int, vararg timeMark: TimeMark) {
         timeMark.forEach { tm ->
             deleteTime(tm)
-            if (getWorkTimesInDay(userId, tm.day).isEmpty()) {
-                deleteDay(DayMark(tm.day, userId))
+            if (getWorkTimesInDay(jobId, tm.day).isEmpty()) {
+                deleteDay(DayMark(tm.day, jobId))
             }
         }
     }
 
-    @Query("SELECT TimeMark.timeStamp, TimeMark.day FROM TimeMark INNER JOIN DayMark ON TimeMark.day=DayMark.day WHERE DayMark.userId=:userId AND TimeMark.day=:day")
-    abstract suspend fun getWorkTimesInDay(userId: Int, day: Day): List<TimeMark>
+    @Query("SELECT TimeMark.timeStamp, TimeMark.day FROM TimeMark INNER JOIN DayMark ON TimeMark.day=DayMark.day WHERE DayMark.jobId=:jobId AND TimeMark.day=:day")
+    abstract suspend fun getWorkTimesInDay(jobId: Int, day: Day): List<TimeMark>
 
     @Insert
     abstract suspend fun createUser(user: User): Long
@@ -82,8 +99,8 @@ abstract class DayMarkDAO {
     }
 
     @Transaction
-    open suspend fun timeSpentInDay(userId: Int, day: Day): Duration {
-        val times = getWorkTimesInDay(userId, day).let {
+    open suspend fun timeSpentInDay(jobId: Int, day: Day): Duration {
+        val times = getWorkTimesInDay(jobId, day).let {
             if (it.size % 2 == 1) it.subList(0, it.size - 1)
             else it
         }
@@ -103,11 +120,11 @@ abstract class DayMarkDAO {
 
     @Transaction
     open suspend fun timeSpentInPeriod(
-        userId: Int,
+        jobId: Int,
         from: Day,
         to: Day
     ): Duration {
-        val times = getDaysBetween(userId, from, to)
+        val times = getDaysBetween(jobId, from, to)
         var sum = Duration.ZERO
         for (day in times) {
             val l = day.times.let {
@@ -120,10 +137,10 @@ abstract class DayMarkDAO {
     }
 
     @Transaction
-    open suspend fun insertCurrentTimeStamp(userId: Int) {
+    open suspend fun insertCurrentTimeStamp(jobId: Int) {
         val now = OffsetDateTime.now()
         val day = now.asDay()
-        insertNewDate(DayMark(day, userId))
+        insertNewDate(DayMark(day, jobId))
         insertNewTimestamp(TimeMark(now.toOffsetTime(), day))
     }
 }

@@ -6,14 +6,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.knightleo.bateponto.data.entity.DayMark
+import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
 
 private const val DB_NAME = "bateponto-db"
 
 @Database(
-    entities = [User::class, DayMark::class, TimeMark::class],
-    version = 1
+    entities = [User::class, DayMark::class, TimeMark::class, Job::class],
+    version = 2,
 )
 @TypeConverters(
     DayTypeConverter::class,
@@ -27,4 +28,7 @@ internal fun buildDatabase(context: Context): AppDatabase = Room.databaseBuilder
     context,
     AppDatabase::class.java,
     DB_NAME
-).build()
+).run {
+    addMigrations(*MIGRATIONS)
+    build()
+}

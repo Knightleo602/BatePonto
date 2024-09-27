@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.ui.screens.daylist
+package com.knightleo.bateponto.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer

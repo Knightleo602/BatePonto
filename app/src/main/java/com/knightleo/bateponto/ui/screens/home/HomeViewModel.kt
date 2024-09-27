@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.ui.screens.daylist
+package com.knightleo.bateponto.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,8 +6,11 @@ import com.knightleo.bateponto.data.DayMarkDAO
 import com.knightleo.bateponto.data.currentWeekRange
 import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.data.entity.DayMark
+import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
+import com.knightleo.bateponto.data.repositories.PreferencesRepository
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,46 +27,81 @@ typealias Week = Pair<Day, Day>
 
 data class MarkState(
     val marks: DaysAndTimesWorked = emptyList(),
-    val selectedWeek: Week = Day() to Day()
+    val selectedWeek: Week = Day() to Day(),
+    val jobs: List<Job> = emptyList(),
+    val selectedJob: Int? = null
 )
 
-class DayListViewModel(
-    private val dayMarkDAO: DayMarkDAO
+data class ScreenState(
+    val loading: Boolean = false,
+)
+
+class HomeViewModel(
+    private val dayMarkDAO: DayMarkDAO,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
+    val markState: StateFlow<MarkState> get() = _markState
+    private val _screenState: MutableStateFlow<ScreenState> = MutableStateFlow(ScreenState())
+    val screenState: StateFlow<ScreenState> get() = _screenState
+
+    private val currentJob: Job
+        inline get() = _markState.value.jobs[_markState.value.selectedJob!!]
+
     var user: User = User(0, "")
         private set
-    val markState: StateFlow<MarkState> get() = _markState
 
     init {
         coroutineLaunch {
+            _screenState.update { it.copy(loading = true) }
             user = dayMarkDAO.getUser() ?: kotlin.run {
                 val id = dayMarkDAO.createUser(User(0, "Bob"))
                 dayMarkDAO.getUser(id.toInt())
             }
+            loadJobs()
             loadMarks()
         }
     }
 
-    private inline fun coroutineLaunch(
-        crossinline block: suspend CoroutineScope.() -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) { block() }
+    private fun coroutineLaunch(block: suspend CoroutineScope.() -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _screenState.update {
+                    it.copy(loading = true)
+                }
+                block()
+            } catch (e: Exception) {
+                Napier.e("Error in coroutineLaunch: ${e.message}", throwable = e)
+            } finally {
+                _screenState.update {
+                    it.copy(loading = false)
+                }
+            }
+        }
+    }
+
+    private suspend fun loadJobs() {
+        val jobs = dayMarkDAO.getAllJobs(user.id).jobs
+        val currentSelectedJobId =
+            preferencesRepository.currentSelectedJobId ?: if (jobs.isNotEmpty()) 0 else null
+        _markState.update {
+            it.copy(jobs = jobs, selectedJob = currentSelectedJobId)
+        }
     }
 
     private suspend fun loadMarks(
         week: Week = currentWeekRange()
     ) {
-        val marks = dayMarkDAO.getDaysBetween(user.id, week.first, week.second)
+        val marks = dayMarkDAO.getDaysBetween(currentJob.id, week.first, week.second)
         val sums = MutableList(marks.size) {
             dayMarkDAO.timeSpentInDay(
-                user.id,
+                currentJob.id,
                 marks[it].dayMark.day
             )
         }
         val times = marks.mapIndexed { index, dayMarks ->
-            val times = dayMarkDAO.getWorkTimesInDay(user.id, dayMarks.dayMark.day)
+            val times = dayMarkDAO.getWorkTimesInDay(currentJob.id, dayMarks.dayMark.day)
             dayMarks.dayMark.day to sums[index] to times.map { it.timeStamp }
         }
         _markState.update {
@@ -72,7 +110,7 @@ class DayListViewModel(
     }
 
     fun addNewMark() = coroutineLaunch {
-        dayMarkDAO.insertCurrentTimeStamp(user.id)
+        dayMarkDAO.insertCurrentTimeStamp(currentJob.id)
         loadMarks()
     }
 
@@ -82,12 +120,12 @@ class DayListViewModel(
     }
 
     private fun deleteDay(date: Day) = coroutineLaunch {
-        dayMarkDAO.deleteDay(DayMark(date, user.id))
+        dayMarkDAO.deleteDay(DayMark(date, currentJob.id))
         loadMarks()
     }
 
     private fun deleteTime(date: Day, time: OffsetTime) = coroutineLaunch {
-        dayMarkDAO.deleteTimeFromDay(user.id, TimeMark(time, date))
+        dayMarkDAO.deleteTimeFromDay(currentJob.id, TimeMark(time, date))
         loadMarks()
     }
 

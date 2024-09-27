@@ -11,11 +11,11 @@ data class User(
     val name: String
 )
 
-data class UserWorkTimes(
+data class UserJobs(
     @Embedded val user: User,
     @Relation(
         parentColumn = "id",
         entityColumn = "userId"
     )
-    val workTimes: List<DayMark>
+    val jobs: List<Job>
 )

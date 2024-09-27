@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.ui.screens.daylist
+package com.knightleo.bateponto.ui.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,9 +29,9 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.OffsetTime
 
 @Composable
-fun ListScreen(
+fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: DayListViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val localDensity = LocalDensity.current
     val state by viewModel.markState.collectAsStateWithLifecycle()
@@ -83,32 +83,38 @@ fun ListScreen(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->
-        DaysList(
-            week = state.selectedWeek,
-            userName = viewModel.user.name,
-            modifier = Modifier.padding(innerPadding),
-            dayMarks = state.marks,
-            onSelectTime = { day, time ->
-                selectedTime = time
-                selectedDate = day
-            },
-            onSelectDay = {
-                selectedDate = it
-                selectedTime = null
-            },
-            onSelectWeek = {
-                viewModel.changeWeek(it)
-                selectedDate = null
-                selectedTime = null
-            },
-            bottomPadding = fabButtonsSize,
-            selectedTime = selectedTime,
-            selectedDay = selectedDate,
-            onDayLongClick = {
-                selectedDate = it
-                showDeleteDayDialog = true
-            }
-        )
+        if (state.jobs.isEmpty()) {
+            // TODO show create job onboarding
+        } else if (state.selectedJob == null) {
+            // TODO show select job screen
+        } else {
+            DaysList(
+                week = state.selectedWeek,
+                userName = viewModel.user.name,
+                modifier = Modifier.padding(innerPadding),
+                dayMarks = state.marks,
+                onSelectTime = { day, time ->
+                    selectedTime = time
+                    selectedDate = day
+                },
+                onSelectDay = {
+                    selectedDate = it
+                    selectedTime = null
+                },
+                onSelectWeek = {
+                    viewModel.changeWeek(it)
+                    selectedDate = null
+                    selectedTime = null
+                },
+                bottomPadding = fabButtonsSize,
+                selectedTime = selectedTime,
+                selectedDay = selectedDate,
+                onDayLongClick = {
+                    selectedDate = it
+                    showDeleteDayDialog = true
+                }
+            )
+        }
     }
     CommonAlertDialog(
         show = showDeleteDayDialog,
