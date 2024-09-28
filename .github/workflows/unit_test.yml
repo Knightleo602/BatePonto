@@ -25,5 +25,5 @@ jobs:
         with:
           cache-overwrite-existing: true
 
-      - name: Build with Gradle
+      - name: Unit Tests
         run: ./gradlew testDebugUnitTest
