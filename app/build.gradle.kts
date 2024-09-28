@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -63,6 +64,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout.compose)
+
+    implementation(platform(libs.google.firebase.bom))
+    implementation(libs.google.firebase.analytics)
 
     implementation(libs.napier)
 

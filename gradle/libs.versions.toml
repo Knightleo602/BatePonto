@@ -13,6 +13,8 @@ room = "2.6.1"
 ksp = "2.0.20-1.0.25"
 koin = "4.0.0"
 constraintLayout = "1.0.1"
+googleServices = "4.4.2"
+firebase = "33.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +38,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }
+google-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -43,6 +47,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 [bundles]
 koin = [
