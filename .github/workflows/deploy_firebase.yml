@@ -8,6 +8,9 @@ on:
         required: true
         default: 'Manual Deploy'
         description: "The description of the release"
+  push:
+    branches:
+      - master
 
 jobs:
   deploy:
