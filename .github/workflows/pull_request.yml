@@ -1,0 +1,10 @@
+name: Pull Request Full Verification
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  unit_test:
+    name: Unit Tests
+    uses: ./.github/workflows/unit_test.yml
