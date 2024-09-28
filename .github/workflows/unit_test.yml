@@ -1,13 +1,11 @@
-name: Android CI
+name: Unit Tests
 
 on:
-  push:
-    branches: [ "master", "4-actions" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
-  build:
+  unit_test:
 
     runs-on: ubuntu-latest
 
@@ -28,10 +26,4 @@ jobs:
           cache-overwrite-existing: true
 
       - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Upload Build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: BatePonto.apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+        run: ./gradlew testDebugUnitTest
