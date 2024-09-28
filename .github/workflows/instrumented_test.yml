@@ -30,11 +30,15 @@ jobs:
       - name: Assemble Android Instrumentation Tests
         run: ./gradlew assembleDebugAndroidTest
 
-      - name: Login do Google Cloud
+      - name: Authenticate Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}'
+
+      - name: Login to Google Cloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           version: '>= 363.0.0'
-          service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
       - name: Set Current Project
         run: gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
