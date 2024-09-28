@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BatePonto</string>
     <string name="time_worked">Worked: %s</string>
     <string name="config">Settings</string>
     <string name="delete_day_prompt_title">Delete</string>
@@ -12,4 +11,5 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="week_range_format">%s to %s</string>
+    <string name="default_job_name">Job</string>
 </resources>

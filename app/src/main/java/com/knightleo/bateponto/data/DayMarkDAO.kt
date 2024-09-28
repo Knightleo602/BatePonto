@@ -74,7 +74,7 @@ abstract class DayMarkDAO {
         }
     }
 
-    @Query("SELECT TimeMark.timeStamp, TimeMark.day FROM TimeMark INNER JOIN DayMark ON TimeMark.day=DayMark.day WHERE DayMark.jobId=:jobId AND TimeMark.day=:day")
+    @Query("SELECT * FROM TimeMark INNER JOIN DayMark ON TimeMark.day=DayMark.day WHERE DayMark.jobId=:jobId AND TimeMark.day=:day")
     abstract suspend fun getWorkTimesInDay(jobId: Int, day: Day): List<TimeMark>
 
     @Insert

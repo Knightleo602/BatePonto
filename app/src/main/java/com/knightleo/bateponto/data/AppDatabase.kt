@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
@@ -29,6 +30,7 @@ internal fun buildDatabase(context: Context): AppDatabase = Room.databaseBuilder
     AppDatabase::class.java,
     DB_NAME
 ).run {
-    addMigrations(*MIGRATIONS)
+    val defaultJobName = context.getString(R.string.default_job_name)
+    addMigrations(migrationV1toV2(defaultJobName))
     build()
 }

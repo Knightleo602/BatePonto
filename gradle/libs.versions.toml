@@ -47,10 +47,6 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 androidx-room = { id = "androidx.room", version.ref = "room" }
 
 [bundles]
-koin = [
-    "koin-compose"
-]
-room = [
-    "androidx-room-ktx", "androidx-room-runtime"
-]
+koin = ["koin-compose"]
+room = ["androidx-room-ktx", "androidx-room-runtime"]
 
