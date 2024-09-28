@@ -3,6 +3,9 @@ name: Unit Tests
 on:
   workflow_dispatch:
   workflow_call:
+  push:
+    branches-ignore:
+      - master
 
 jobs:
   unit_test:
