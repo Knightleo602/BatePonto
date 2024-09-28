@@ -7,7 +7,6 @@ on:
 
 jobs:
   lint:
-    name: Linting debug
     runs-on: ubuntu-latest
 
     steps:
@@ -25,4 +24,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run LintDebug
-        uses: ./gradlew lintDebug
+        run: ./gradlew lintDebug
