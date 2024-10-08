@@ -14,7 +14,7 @@ ksp = "2.0.20-1.0.25"
 koin = "4.0.0"
 constraintLayout = "1.0.1"
 googleServices = "4.4.2"
-firebase = "33.3.0"
+firebase = "33.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
