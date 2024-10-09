@@ -20,4 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "BatePonto"
-include(":app")
+include(":app", ":feature", ":core")
+include(":feature:widget")
+include(":core:data")
