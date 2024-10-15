@@ -7,15 +7,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.currentWeekRange
@@ -40,6 +45,19 @@ fun ListScreen(
     var selectedDate: Day? by remember { mutableStateOf(null) }
     var selectedTime: OffsetTime? by remember { mutableStateOf(null) }
     var fabButtonsSize by remember { mutableStateOf(70.dp) }
+    val lifecycle = rememberUpdatedState(LocalLifecycleOwner.current)
+    DisposableEffect(lifecycle.value) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        val lifecycle = lifecycle.value.lifecycle
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()

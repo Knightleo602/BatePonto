@@ -43,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -77,6 +78,7 @@ dependencies {
 
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
+    implementation(libs.koin.workmanager)
 
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)

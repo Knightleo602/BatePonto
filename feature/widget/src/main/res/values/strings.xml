@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_user">There is no connected user</string>
+    <string name="no_user_description">No user</string>
+    <string name="add_new_time_description">Add new time</string>
+</resources>

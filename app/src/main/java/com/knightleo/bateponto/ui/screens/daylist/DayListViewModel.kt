@@ -8,12 +8,15 @@ import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
+import com.knightleo.bateponto.data.repository.PreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.OffsetTime
 
@@ -28,7 +31,8 @@ data class MarkState(
 )
 
 class DayListViewModel(
-    private val dayMarkDAO: DayMarkDAO
+    private val dayMarkDAO: DayMarkDAO,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
@@ -38,11 +42,19 @@ class DayListViewModel(
 
     init {
         coroutineLaunch {
-            user = dayMarkDAO.getUser() ?: kotlin.run {
-                val id = dayMarkDAO.createUser(User(0, "Bob"))
-                dayMarkDAO.getUser(id.toInt())
+            val userIdFlow = preferencesRepository.activeUserid
+            if(userIdFlow.firstOrNull() == null) {
+                val id = dayMarkDAO.createUser(User(0, "Bob")).toInt()
+                changeUser(id)
             }
-            loadMarks()
+            withContext(Dispatchers.IO) {
+                userIdFlow.collect {
+                    if (it != null) {
+                        user = dayMarkDAO.getUser(it)
+                        loadMarks()
+                    }
+                }
+            }
         }
     }
 
@@ -69,6 +81,10 @@ class DayListViewModel(
         _markState.update {
             it.copy(marks = times, selectedWeek = week)
         }
+    }
+
+    fun refresh() = coroutineLaunch {
+        loadMarks()
     }
 
     fun addNewMark() = coroutineLaunch {
@@ -101,4 +117,8 @@ class DayListViewModel(
     }
 
     fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week) }
+
+    fun changeUser(id: Int) = coroutineLaunch {
+        preferencesRepository.setActiveUserId(id)
+    }
 }

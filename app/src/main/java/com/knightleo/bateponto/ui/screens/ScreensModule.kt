@@ -5,5 +5,5 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val screensModule = module {
-    viewModel { DayListViewModel(get()) }
+    viewModel { DayListViewModel(get(), get()) }
 }

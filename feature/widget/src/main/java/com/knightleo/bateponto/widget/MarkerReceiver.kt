@@ -2,19 +2,18 @@ package com.knightleo.bateponto.widget
 
 import android.content.Context
 import android.content.Intent
-import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+import androidx.glance.appwidget.updateAll
+import com.knightleo.bateponto.data.repository.USER_ID_UPDATE_KEY
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 class MarkerReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = MarkerWidget()
+    override val glanceAppWidget: MarkerWidget = MarkerWidget()
 
     override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        startKoin {
-            androidContext(context)
-            modules(module)
-        }
+        if(intent.getBooleanExtra(USER_ID_UPDATE_KEY, false)) runBlocking(Dispatchers.Unconfined) {
+            glanceAppWidget.updateAll(context)
+        } else super.onReceive(context, intent)
     }
 }
