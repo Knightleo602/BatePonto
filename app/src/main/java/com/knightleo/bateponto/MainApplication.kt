@@ -1,8 +1,6 @@
 package com.knightleo.bateponto
 
 import android.app.Application
-import android.util.Log
-import androidx.work.Configuration
 import com.knightleo.bateponto.data.dataModule
 import com.knightleo.bateponto.ui.screens.screensModule
 import com.knightleo.bateponto.widget.widgetModule
@@ -14,7 +12,7 @@ import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 
-class MainApplication : Application(), KoinComponent, Configuration.Provider {
+class MainApplication : Application(), KoinComponent {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -25,9 +23,4 @@ class MainApplication : Application(), KoinComponent, Configuration.Provider {
         }
         Napier.base(DebugAntilog())
     }
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().apply {
-            setMinimumLoggingLevel(Log.DEBUG)
-        }.build()
 }
