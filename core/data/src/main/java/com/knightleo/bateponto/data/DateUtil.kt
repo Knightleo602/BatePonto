@@ -12,6 +12,8 @@ fun currentWeekRange(): Pair<Day, Day> {
     return startOfWeek.asDay() to endOfWeek.asDay()
 }
 
+fun today(): Day = OffsetDateTime.now().asDay()
+
 fun Day.weekRange(): Pair<Day, Day> {
     val now = LocalDateTime.of(year, month, day, 0, 0)
     val startOfWeek = now.minusDays(now.dayOfWeek.ordinal.toLong())

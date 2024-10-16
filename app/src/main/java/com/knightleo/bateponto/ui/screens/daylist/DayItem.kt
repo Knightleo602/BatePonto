@@ -42,9 +42,9 @@ import androidx.compose.ui.unit.min
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.entity.Day
-import com.knightleo.bateponto.ui.condition
-import com.knightleo.bateponto.ui.formatted
-import com.knightleo.bateponto.ui.formattedTime
+import com.knightleo.bateponto.domain.condition
+import com.knightleo.bateponto.domain.formatted
+import com.knightleo.bateponto.domain.formattedTime
 import java.time.Duration
 import java.time.OffsetTime
 

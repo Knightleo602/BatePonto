@@ -23,3 +23,4 @@ rootProject.name = "BatePonto"
 include(":app", ":feature", ":core")
 include(":feature:widget")
 include(":core:data")
+include(":core:domain")

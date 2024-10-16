@@ -7,4 +7,5 @@ import org.koin.dsl.module
 val widgetModule = module {
     worker<MarkerUserWorker> { MarkerUserWorker(androidContext(), get()) }
     worker<MarkerAddWorker> { MarkerAddWorker(androidContext(), get()) }
+    single<MarkerWidgetUpdater> { MarkerWidgetUpdaterImpl(get()) }
 }

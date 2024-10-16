@@ -21,6 +21,6 @@ class MainApplication : Application(), KoinComponent {
             modules(dataModule, screensModule, widgetModule)
             workManagerFactory()
         }
-        Napier.base(DebugAntilog())
+        Napier.base(DebugAntilog("BatePonto"))
     }
 }

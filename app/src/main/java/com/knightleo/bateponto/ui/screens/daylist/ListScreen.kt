@@ -25,11 +25,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.currentWeekRange
 import com.knightleo.bateponto.data.entity.Day
+import com.knightleo.bateponto.domain.formatted
+import com.knightleo.bateponto.domain.hourAndMinuteToOffsetTime
 import com.knightleo.bateponto.ui.ActionButtons
 import com.knightleo.bateponto.ui.AppTopBar
 import com.knightleo.bateponto.ui.CommonAlertDialog
-import com.knightleo.bateponto.ui.formatted
-import com.knightleo.bateponto.ui.hourAndMinuteToOffsetTime
 import org.koin.androidx.compose.koinViewModel
 import java.time.OffsetTime
 
@@ -48,14 +48,22 @@ fun ListScreen(
     val lifecycle = rememberUpdatedState(LocalLifecycleOwner.current)
     DisposableEffect(lifecycle.value) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.refresh()
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.refresh()
+                }
+
+                Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.updateWidget()
+                }
+
+                else -> {}
             }
         }
-        val lifecycle = lifecycle.value.lifecycle
-        lifecycle.addObserver(observer)
+        val l = lifecycle.value.lifecycle
+        l.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
+            l.removeObserver(observer)
         }
     }
     Scaffold(
@@ -103,7 +111,7 @@ fun ListScreen(
     ) { innerPadding ->
         DaysList(
             week = state.selectedWeek,
-            userName = viewModel.user.name,
+            userName = "viewModel.user.name",
             modifier = Modifier.padding(innerPadding),
             dayMarks = state.marks,
             onSelectTime = { day, time ->

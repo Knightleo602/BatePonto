@@ -41,6 +41,9 @@ android {
 
 dependencies {
 
+    implementation(project(":core:data"))
+    implementation(project(":core:domain"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -48,7 +51,6 @@ dependencies {
     implementation(libs.napier)
 
     implementation(libs.bundles.glance)
-    implementation(project(":core:data"))
     implementation(libs.androidx.material3)
 
     implementation(platform(libs.koin.bom))

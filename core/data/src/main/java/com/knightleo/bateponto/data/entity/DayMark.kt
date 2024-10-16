@@ -7,6 +7,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import com.knightleo.bateponto.data.OffsetTimeConverter
+import com.knightleo.bateponto.data.entity.Day.Companion.asDay
 import kotlinx.parcelize.Parcelize
 import java.time.OffsetDateTime
 import java.time.OffsetTime
@@ -72,7 +74,19 @@ data class DayMark(
 data class TimeMark(
     @PrimaryKey val timeStamp: OffsetTime,
     @ColumnInfo(index = true) val day: Day
-)
+) {
+    override fun toString(): String = "${OffsetTimeConverter().offsetToString(timeStamp)}-$day"
+
+    companion object {
+        fun String.asTimeMark(): TimeMark {
+            val s = split('-')
+            return TimeMark(
+                timeStamp = OffsetTimeConverter().stringToOffset(s[0]),
+                day = s[1].asDay()
+            )
+        }
+    }
+}
 
 data class DayMarks(
     @Embedded val dayMark: DayMark,
@@ -81,5 +95,4 @@ data class DayMarks(
         entityColumn = "day"
     )
     val times: List<TimeMark>
-
 )

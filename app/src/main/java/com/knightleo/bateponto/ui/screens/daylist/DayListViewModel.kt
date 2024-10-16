@@ -9,6 +9,8 @@ import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
 import com.knightleo.bateponto.data.repository.PreferencesRepository
+import com.knightleo.bateponto.data.today
+import com.knightleo.bateponto.widget.MarkerWidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,8 @@ data class MarkState(
 
 class DayListViewModel(
     private val dayMarkDAO: DayMarkDAO,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val widgetUpdater: MarkerWidgetUpdater
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
@@ -43,7 +46,7 @@ class DayListViewModel(
     init {
         coroutineLaunch {
             val userIdFlow = preferencesRepository.activeUserid
-            if(userIdFlow.firstOrNull() == null) {
+            if (userIdFlow.firstOrNull() == null) {
                 val id = dayMarkDAO.createUser(User(0, "Bob")).toInt()
                 changeUser(id)
             }
@@ -51,7 +54,7 @@ class DayListViewModel(
                 userIdFlow.collect {
                     if (it != null) {
                         user = dayMarkDAO.getUser(it)
-                        loadMarks()
+                        loadMarks(user)
                     }
                 }
             }
@@ -65,6 +68,7 @@ class DayListViewModel(
     }
 
     private suspend fun loadMarks(
+        user: User = this.user,
         week: Week = currentWeekRange()
     ) {
         val marks = dayMarkDAO.getDaysBetween(user.id, week.first, week.second)
@@ -116,7 +120,13 @@ class DayListViewModel(
         loadMarks()
     }
 
-    fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week) }
+    fun updateWidget() = coroutineLaunch {
+        val todayMarks = dayMarkDAO.getWorkTimesInDay(user.id, today())
+        widgetUpdater.updateTimeMarks(todayMarks)
+        widgetUpdater.updateAll()
+    }
+
+    fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week = week) }
 
     fun changeUser(id: Int) = coroutineLaunch {
         preferencesRepository.setActiveUserId(id)
