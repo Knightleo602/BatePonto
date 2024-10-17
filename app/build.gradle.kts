@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.androidx.room)
 }
 
@@ -13,14 +15,14 @@ room {
 
 android {
     namespace = "com.knightleo.bateponto"
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.knightleo.bateponto"
-        minSdk = 26
+        minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 102
+        versionName = "v1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -46,6 +48,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -62,6 +65,10 @@ android {
 
 dependencies {
 
+    implementation(project(":feature:widget"))
+    implementation(project(":core:data"))
+    implementation(project(":core:domain"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -72,13 +79,19 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout.compose)
 
+    implementation(platform(libs.google.firebase.bom))
+    implementation(libs.google.firebase.analytics)
+    implementation(libs.google.firebase.crashlytics)
+
     implementation(libs.napier)
 
     implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)
-
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
+    implementation(libs.koin.workmanager)
+
+    ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -11,12 +11,17 @@ import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
 import com.knightleo.bateponto.data.repositories.PreferencesRepository
 import io.github.aakira.napier.Napier
+import com.knightleo.bateponto.data.repository.PreferencesRepository
+import com.knightleo.bateponto.data.today
+import com.knightleo.bateponto.widget.data.MarkerWidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.OffsetTime
 
@@ -38,7 +43,8 @@ data class ScreenState(
 
 class HomeViewModel(
     private val dayMarkDAO: DayMarkDAO,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val widgetUpdater: MarkerWidgetUpdater
 ) : ViewModel() {
 
     private val _markState: MutableStateFlow<MarkState> = MutableStateFlow(MarkState())
@@ -54,13 +60,20 @@ class HomeViewModel(
 
     init {
         coroutineLaunch {
-            _screenState.update { it.copy(loading = true) }
-            user = dayMarkDAO.getUser() ?: kotlin.run {
-                val id = dayMarkDAO.createUser(User(0, "Bob"))
-                dayMarkDAO.getUser(id.toInt())
+            val userIdFlow = preferencesRepository.activeUserid
+            if (userIdFlow.firstOrNull() == null) {
+                val id = dayMarkDAO.createUser(User(0, "Bob")).toInt()
+                changeUser(id)
             }
-            loadJobs()
-            loadMarks()
+            withContext(Dispatchers.IO) {
+                userIdFlow.collect {
+                    if (it != null) {
+                        user = dayMarkDAO.getUser(it)
+                        loadJobs()
+                        loadMarks(user)
+                    }
+                }
+            }
         }
     }
 
@@ -91,6 +104,7 @@ class HomeViewModel(
     }
 
     private suspend fun loadMarks(
+        user: User = this.user,
         week: Week = currentWeekRange()
     ) {
         val marks = dayMarkDAO.getDaysBetween(currentJob.id, week.first, week.second)
@@ -107,6 +121,10 @@ class HomeViewModel(
         _markState.update {
             it.copy(marks = times, selectedWeek = week)
         }
+    }
+
+    fun refresh() = coroutineLaunch {
+        loadMarks()
     }
 
     fun addNewMark() = coroutineLaunch {
@@ -138,5 +156,18 @@ class HomeViewModel(
         loadMarks()
     }
 
-    fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week) }
+    fun updateWidget() = coroutineLaunch {
+        val todayMarks = dayMarkDAO.getWorkTimesInDay(user.id, today())
+        Napier.i {
+            "Updating widget with ${todayMarks.size} marks: $todayMarks"
+        }
+        widgetUpdater.updateTimeMarks(todayMarks)
+        widgetUpdater.updateAll()
+    }
+
+    fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week = week) }
+
+    fun changeUser(id: Int) = coroutineLaunch {
+        preferencesRepository.setActiveUserId(id)
+    }
 }

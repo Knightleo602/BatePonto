@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name=".MarkerReceiverSmall"
+            android:exported="true"
+            android:label="@string/label_widget_small">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/marker_widget_info_small" />
+        </receiver>
+        <receiver
+            android:name=".MarkerReceiverMedium"
+            android:exported="true"
+            android:label="@string/label_widget_medium">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/marker_widget_info_medium" />
+        </receiver>
+    </application>
+</manifest>

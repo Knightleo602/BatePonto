@@ -26,8 +26,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.weekRange
-import com.knightleo.bateponto.ui.formatted
-import com.knightleo.bateponto.ui.selectedDay
+import com.knightleo.bateponto.domain.formatted
+import com.knightleo.bateponto.domain.selectedDay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

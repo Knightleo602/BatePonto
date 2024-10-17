@@ -7,24 +7,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.currentWeekRange
 import com.knightleo.bateponto.data.entity.Day
+import com.knightleo.bateponto.domain.formatted
+import com.knightleo.bateponto.domain.hourAndMinuteToOffsetTime
 import com.knightleo.bateponto.ui.ActionButtons
 import com.knightleo.bateponto.ui.AppTopBar
 import com.knightleo.bateponto.ui.CommonAlertDialog
-import com.knightleo.bateponto.ui.formatted
-import com.knightleo.bateponto.ui.hourAndMinuteToOffsetTime
 import org.koin.androidx.compose.koinViewModel
 import java.time.OffsetTime
 
@@ -40,6 +45,27 @@ fun HomeScreen(
     var selectedDate: Day? by remember { mutableStateOf(null) }
     var selectedTime: OffsetTime? by remember { mutableStateOf(null) }
     var fabButtonsSize by remember { mutableStateOf(70.dp) }
+    val lifecycle = rememberUpdatedState(LocalLifecycleOwner.current)
+    DisposableEffect(lifecycle.value) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.refresh()
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+                    viewModel.updateWidget()
+                }
+
+                else -> {}
+            }
+        }
+        val l = lifecycle.value.lifecycle
+        l.addObserver(observer)
+        onDispose {
+            l.removeObserver(observer)
+        }
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +116,7 @@ fun HomeScreen(
         } else {
             DaysList(
                 week = state.selectedWeek,
-                userName = viewModel.user.name,
+                userName = "viewModel.user.name",
                 modifier = Modifier.padding(innerPadding),
                 dayMarks = state.marks,
                 onSelectTime = { day, time ->
