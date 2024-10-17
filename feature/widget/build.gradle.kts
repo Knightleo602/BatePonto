@@ -41,7 +41,6 @@ android {
 
 dependencies {
 
-    implementation(project(":core:data"))
     implementation(project(":core:domain"))
 
     implementation(libs.androidx.core.ktx)
@@ -61,8 +60,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
 
     implementation(libs.androidx.work.runtime)
-
-    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

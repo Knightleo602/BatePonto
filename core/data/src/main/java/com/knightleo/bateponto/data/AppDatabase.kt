@@ -5,11 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.knightleo.bateponto.R
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
+import com.knightleo.bateponto.domain.R
 
 private const val DB_NAME = "bateponto-db"
 

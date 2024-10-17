@@ -9,12 +9,14 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.knightleo.bateponto.data.entity.Day
 import com.knightleo.bateponto.data.entity.Day.Companion.asDay
+import com.knightleo.bateponto.data.entity.Day.Companion.asEntity
 import com.knightleo.bateponto.data.entity.DayMark
 import com.knightleo.bateponto.data.entity.DayMarks
 import com.knightleo.bateponto.data.entity.Job
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
 import com.knightleo.bateponto.data.entity.UserJobs
+import com.knightleo.bateponto.domain.utils.currentWeekRange
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.OffsetTime
@@ -95,7 +97,7 @@ abstract class DayMarkDAO {
     @Transaction
     open suspend fun currentWeekDays(userId: Int): List<DayMarks> {
         val (start, now) = currentWeekRange()
-        return getDaysBetween(userId, start, now)
+        return getDaysBetween(userId, start.asEntity(), now.asEntity())
     }
 
     @Transaction

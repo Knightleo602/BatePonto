@@ -2,18 +2,16 @@ package com.knightleo.bateponto.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.knightleo.bateponto.data.DayMarkDAO
-import com.knightleo.bateponto.data.currentWeekRange
-import com.knightleo.bateponto.data.entity.Day
-import com.knightleo.bateponto.data.entity.DayMark
-import com.knightleo.bateponto.data.entity.Job
-import com.knightleo.bateponto.data.entity.TimeMark
-import com.knightleo.bateponto.data.entity.User
-import com.knightleo.bateponto.data.repositories.PreferencesRepository
+import com.knightleo.bateponto.domain.model.Day
+import com.knightleo.bateponto.domain.model.Job
+import com.knightleo.bateponto.domain.model.Time
+import com.knightleo.bateponto.domain.model.User
+import com.knightleo.bateponto.domain.repository.DayMarkRepository
+import com.knightleo.bateponto.domain.repository.MarkerWidgetUpdater
+import com.knightleo.bateponto.domain.repository.PreferencesRepository
+import com.knightleo.bateponto.domain.utils.currentWeekRange
+import com.knightleo.bateponto.domain.utils.today
 import io.github.aakira.napier.Napier
-import com.knightleo.bateponto.data.repository.PreferencesRepository
-import com.knightleo.bateponto.data.today
-import com.knightleo.bateponto.widget.data.MarkerWidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +32,8 @@ data class MarkState(
     val marks: DaysAndTimesWorked = emptyList(),
     val selectedWeek: Week = Day() to Day(),
     val jobs: List<Job> = emptyList(),
-    val selectedJob: Int? = null
+    val selectedJob: Job? = null,
+    val user: User? = null,
 )
 
 data class ScreenState(
@@ -42,7 +41,7 @@ data class ScreenState(
 )
 
 class HomeViewModel(
-    private val dayMarkDAO: DayMarkDAO,
+    private val dayMarkRepository: DayMarkRepository,
     private val preferencesRepository: PreferencesRepository,
     private val widgetUpdater: MarkerWidgetUpdater
 ) : ViewModel() {
@@ -52,25 +51,40 @@ class HomeViewModel(
     private val _screenState: MutableStateFlow<ScreenState> = MutableStateFlow(ScreenState())
     val screenState: StateFlow<ScreenState> get() = _screenState
 
-    private val currentJob: Job
-        inline get() = _markState.value.jobs[_markState.value.selectedJob!!]
+    private val currentJob: Job?
+        inline get() = _markState.value.selectedJob
 
-    var user: User = User(0, "")
-        private set
+    private val currentUser: User?
+        inline get() = _markState.value.user
 
     init {
         coroutineLaunch {
-            val userIdFlow = preferencesRepository.activeUserid
+            val userIdFlow = preferencesRepository.activeUserId
+            val jobIdFlow = preferencesRepository.activeJobId
             if (userIdFlow.firstOrNull() == null) {
-                val id = dayMarkDAO.createUser(User(0, "Bob")).toInt()
+                val id = dayMarkRepository.createUser(User(0, "Bob"))
                 changeUser(id)
             }
             withContext(Dispatchers.IO) {
-                userIdFlow.collect {
-                    if (it != null) {
-                        user = dayMarkDAO.getUser(it)
-                        loadJobs()
-                        loadMarks(user)
+                launch {
+                    userIdFlow.collect {
+                        if (it != null) {
+                            val user = dayMarkRepository.getUser(it)
+                            reLoadJobs()
+                            loadMarks()
+                            _markState.update { s ->
+                                s.copy(user = user)
+                            }
+                        }
+                    }
+                }
+                jobIdFlow.collect {
+                    if (it != null && it != currentJob?.id && currentUser != null) {
+                        val job = dayMarkRepository.getJob(it)
+                        val jobs = dayMarkRepository.getAllJobs(currentUser!!.id)
+                        _markState.update { s ->
+                            s.copy(jobs = jobs, selectedJob = job)
+                        }
                     }
                 }
             }
@@ -94,29 +108,31 @@ class HomeViewModel(
         }
     }
 
-    private suspend fun loadJobs() {
-        val jobs = dayMarkDAO.getAllJobs(user.id).jobs
-        val currentSelectedJobId =
-            preferencesRepository.currentSelectedJobId ?: if (jobs.isNotEmpty()) 0 else null
+    private suspend fun reLoadJobs() {
+        if (currentUser == null) return
+        val jobs = dayMarkRepository.getAllJobs(currentUser!!.id)
         _markState.update {
-            it.copy(jobs = jobs, selectedJob = currentSelectedJobId)
+            it.copy(jobs = jobs)
         }
     }
 
-    private suspend fun loadMarks(
-        user: User = this.user,
-        week: Week = currentWeekRange()
-    ) {
-        val marks = dayMarkDAO.getDaysBetween(currentJob.id, week.first, week.second)
+    private suspend fun loadMarks(week: Week = currentWeekRange()) {
+        if (currentJob == null) return
+        val jobId = currentJob!!.id
+        val marks = dayMarkRepository.getTimeInDaysBetween(
+            jobId,
+            week.first,
+            week.second
+        )
         val sums = MutableList(marks.size) {
-            dayMarkDAO.timeSpentInDay(
-                currentJob.id,
-                marks[it].dayMark.day
+            dayMarkRepository.getTimeSpentInDay(
+                jobId,
+                marks[it].first
             )
         }
         val times = marks.mapIndexed { index, dayMarks ->
-            val times = dayMarkDAO.getWorkTimesInDay(currentJob.id, dayMarks.dayMark.day)
-            dayMarks.dayMark.day to sums[index] to times.map { it.timeStamp }
+            val times = dayMarkRepository.getTimeInDay(jobId, dayMarks.first)
+            dayMarks.first to sums[index] to times.map { it.timeStamp }
         }
         _markState.update {
             it.copy(marks = times, selectedWeek = week)
@@ -128,36 +144,39 @@ class HomeViewModel(
     }
 
     fun addNewMark() = coroutineLaunch {
-        dayMarkDAO.insertCurrentTimeStamp(currentJob.id)
+        dayMarkRepository.insertTimeNow(currentJob!!.id)
         loadMarks()
     }
 
-    fun delete(date: Day?, time: OffsetTime? = null) = coroutineLaunch {
+    fun delete(date: Day?, time: Time? = null) = coroutineLaunch {
         if (date == null) return@coroutineLaunch
         time?.let { deleteTime(date, it) } ?: deleteDay(date)
     }
 
     private fun deleteDay(date: Day) = coroutineLaunch {
-        dayMarkDAO.deleteDay(DayMark(date, currentJob.id))
+        dayMarkRepository.deleteDay(currentJob!!.id, date)
         loadMarks()
     }
 
-    private fun deleteTime(date: Day, time: OffsetTime) = coroutineLaunch {
-        dayMarkDAO.deleteTimeFromDay(currentJob.id, TimeMark(time, date))
+    private fun deleteTime(date: Day, time: Time) = coroutineLaunch {
+        if (currentJob == null) return@coroutineLaunch
+        dayMarkRepository.deleteTime(currentJob!!.id, date, time)
         loadMarks()
     }
 
     fun updateTime(
-        previousTime: OffsetTime,
-        newTime: OffsetTime,
+        previousTime: Time,
+        newTime: Time,
         date: Day,
     ) = coroutineLaunch {
-        dayMarkDAO.updateTime(previousTime, newTime, date)
+        if (currentJob == null) return@coroutineLaunch
+        dayMarkRepository.updateTime(currentJob!!.id, date, previousTime, newTime)
         loadMarks()
     }
 
     fun updateWidget() = coroutineLaunch {
-        val todayMarks = dayMarkDAO.getWorkTimesInDay(user.id, today())
+        if (currentJob == null) return@coroutineLaunch
+        val todayMarks = dayMarkRepository.getTimeInDay(currentJob!!.id, today())
         Napier.i {
             "Updating widget with ${todayMarks.size} marks: $todayMarks"
         }
@@ -168,6 +187,10 @@ class HomeViewModel(
     fun changeWeek(week: Week) = coroutineLaunch { loadMarks(week = week) }
 
     fun changeUser(id: Int) = coroutineLaunch {
+        val user = dayMarkRepository.getUser(id)
+        _markState.update {
+            it.copy(user = user)
+        }
         preferencesRepository.setActiveUserId(id)
     }
 }

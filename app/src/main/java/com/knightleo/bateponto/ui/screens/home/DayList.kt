@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.knightleo.bateponto.data.entity.Day
+import com.knightleo.bateponto.domain.model.Day
 import java.time.OffsetTime
 
 @Composable

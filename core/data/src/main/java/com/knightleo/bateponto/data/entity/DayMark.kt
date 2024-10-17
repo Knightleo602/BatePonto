@@ -1,6 +1,5 @@
 package com.knightleo.bateponto.data.entity
 
-import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -9,22 +8,20 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.knightleo.bateponto.data.OffsetTimeConverter
 import com.knightleo.bateponto.data.entity.Day.Companion.asDay
-import kotlinx.parcelize.Parcelize
 import java.time.OffsetDateTime
 import java.time.OffsetTime
 
-@Parcelize
 data class Day(
     val day: Int = 0,
     val month: Int = 0,
     val year: Int = 0
-) : Parcelable {
+) {
     override fun toString(): String = "$year-${month.toString().padStart(2, '0')}-${
         day.toString().padStart(2, '0')
     }"
 
     companion object {
-        fun String.asDay(): Day {
+        internal fun String.asDay(): Day {
             val s = split('-')
             return Day(
                 year = s[0].toInt(),
@@ -33,14 +30,23 @@ data class Day(
             )
         }
 
-        fun OffsetDateTime.asDay(): Day = Day(
+        fun OffsetDateTime.asDay() = Day(
+            day = dayOfMonth,
             month = monthValue,
-            year = year,
-            day = dayOfMonth
+            year = year
         )
 
-        @JvmStatic
-        fun now() = OffsetDateTime.now().asDay()
+        fun Day.asModel() = com.knightleo.bateponto.domain.model.Day(
+            day = day,
+            month = month,
+            year = year
+        )
+
+        fun com.knightleo.bateponto.domain.model.Day.asEntity() = Day(
+            day = day,
+            month = month,
+            year = year
+        )
     }
 }
 

@@ -41,10 +41,10 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.knightleo.bateponto.R
-import com.knightleo.bateponto.data.entity.Day
-import com.knightleo.bateponto.domain.condition
-import com.knightleo.bateponto.domain.formatted
-import com.knightleo.bateponto.domain.formattedTime
+import com.knightleo.bateponto.domain.model.Day
+import com.knightleo.bateponto.domain.utils.condition
+import com.knightleo.bateponto.domain.utils.formatted
+import com.knightleo.bateponto.domain.utils.formattedTime
 import java.time.Duration
 import java.time.OffsetTime
 
@@ -231,7 +231,7 @@ private fun DayTitle(
             textAlign = TextAlign.Center
         )
         Text(
-            text = stringResource(R.string.time_worked, day.second.abs().formatted()),
+            text = stringResource(R.string.time_worked, day.second.absoluteValue),
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center
         )

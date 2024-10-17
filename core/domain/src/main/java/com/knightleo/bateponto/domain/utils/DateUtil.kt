@@ -1,7 +1,7 @@
-package com.knightleo.bateponto.data
+package com.knightleo.bateponto.domain.utils
 
-import com.knightleo.bateponto.data.entity.Day
-import com.knightleo.bateponto.data.entity.Day.Companion.asDay
+import com.knightleo.bateponto.domain.model.Day
+import com.knightleo.bateponto.domain.model.Day.Companion.asDay
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 

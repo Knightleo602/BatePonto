@@ -1,5 +1,6 @@
 package com.knightleo.bateponto.widget.data
 
+import com.knightleo.bateponto.domain.repository.MarkerWidgetUpdater
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module

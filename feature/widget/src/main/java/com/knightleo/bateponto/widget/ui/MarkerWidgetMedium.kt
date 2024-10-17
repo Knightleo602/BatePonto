@@ -27,10 +27,10 @@ import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.preview.Preview
 import androidx.glance.text.FontStyle
 import androidx.glance.text.Text
-import com.knightleo.bateponto.data.entity.TimeMark
-import com.knightleo.bateponto.domain.formatted
-import com.knightleo.bateponto.domain.formattedTime
-import com.knightleo.bateponto.domain.timeSpent
+import com.knightleo.bateponto.domain.model.Time
+import com.knightleo.bateponto.domain.utils.formatted
+import com.knightleo.bateponto.domain.utils.formattedTime
+import com.knightleo.bateponto.domain.utils.timeSpent
 import com.knightleo.bateponto.widget.R
 import com.knightleo.bateponto.widget.data.State
 import io.github.aakira.napier.Napier
@@ -41,7 +41,7 @@ import java.time.Duration
 @Preview
 @Composable
 internal fun MediumContent(
-    times: List<TimeMark>,
+    times: List<Time>,
     modifier: GlanceModifier = GlanceModifier,
     currentState: State = State.LOADING,
     onAddTime: () -> Unit = {},
@@ -122,7 +122,7 @@ internal fun MediumContent(
 @Composable
 private fun Item(
     index: Int,
-    timeMark: TimeMark
+    timeMark: Time
 ) {
     if (index == 0) {
         Text(
@@ -141,9 +141,9 @@ private fun Item(
 @Composable
 private fun BreakPeriod(
     index: Int,
-    currentTimes: List<TimeMark>,
-    next: TimeMark,
-    timeMark: TimeMark,
+    currentTimes: List<Time>,
+    next: Time,
+    timeMark: Time,
     modifier: GlanceModifier = GlanceModifier
 ) {
     Row(

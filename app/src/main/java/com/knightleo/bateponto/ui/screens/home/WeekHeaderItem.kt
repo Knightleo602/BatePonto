@@ -25,9 +25,9 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.knightleo.bateponto.R
-import com.knightleo.bateponto.data.weekRange
-import com.knightleo.bateponto.domain.formatted
+import com.knightleo.bateponto.domain.utils.weekRange
 import com.knightleo.bateponto.domain.selectedDay
+import com.knightleo.bateponto.domain.utils.formatted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

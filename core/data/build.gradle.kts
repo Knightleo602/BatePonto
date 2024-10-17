@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.devtools.ksp)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -49,6 +48,7 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
+    implementation(project(":core:domain"))
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)

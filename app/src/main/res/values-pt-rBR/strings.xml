@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="week_range_format">%s até %s</string>
+    <string name="delete_day_prompt_description">Você tem certeza que gostaria de excluir o dia %s?</string>
+    <string name="hello_user">Olá, %s.</string>
+    <string name="week">Semana</string>
+    <string name="select_date">Selecione uma data</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="time_worked">Trabalhado: %s</string>
+    <string name="config">Configuracões</string>
+    <string name="delete_day_prompt_title">Excluir</string>
+    <string name="list_screen_title">Horas</string>
+</resources>

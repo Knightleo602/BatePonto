@@ -23,10 +23,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.knightleo.bateponto.R
-import com.knightleo.bateponto.data.currentWeekRange
-import com.knightleo.bateponto.data.entity.Day
-import com.knightleo.bateponto.domain.formatted
-import com.knightleo.bateponto.domain.hourAndMinuteToOffsetTime
+import com.knightleo.bateponto.domain.model.Day
+import com.knightleo.bateponto.domain.utils.currentWeekRange
+import com.knightleo.bateponto.domain.utils.formatted
+import com.knightleo.bateponto.domain.utils.hourAndMinuteToOffsetTime
 import com.knightleo.bateponto.ui.ActionButtons
 import com.knightleo.bateponto.ui.AppTopBar
 import com.knightleo.bateponto.ui.CommonAlertDialog

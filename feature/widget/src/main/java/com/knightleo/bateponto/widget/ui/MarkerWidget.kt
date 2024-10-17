@@ -19,6 +19,7 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import com.knightleo.bateponto.data.entity.TimeMark
+import com.knightleo.bateponto.domain.model.Time
 import com.knightleo.bateponto.widget.data.MarkerDataHelper.addTime
 import com.knightleo.bateponto.widget.data.MarkerDataHelper.asString
 import com.knightleo.bateponto.widget.data.MarkerDataHelper.getTodayTimes
@@ -67,7 +68,7 @@ class MarkerWidget : GlanceAppWidget() {
         }
     }
 
-    suspend fun DataStore<Preferences>.updateDayMarks(times: List<TimeMark>?) {
+    suspend fun DataStore<Preferences>.updateDayMarks(times: List<Time>?) {
         edit {
             it[dayMarksKey] = times.asString()
         }

@@ -1,16 +1,15 @@
 <resources>
     <string name="app_name" translatable="false">BatePonto</string>
-    <string name="time_worked">Trabalhado: %s</string>
+    <string name="time_worked">Worked: %s</string>
     <string name="config">Configuracões</string>
-    <string name="delete_day_prompt_title">Excluir</string>
-    <string name="list_screen_title">Horas</string>
-    <string name="delete_day_prompt_description">Você tem certeza que gostaria de excluir o dia %s?</string>
-    <string name="hello_user">Olá, %s.</string>
-    <string name="week">Semana</string>
-    <string name="select_date">Selecione uma data</string>
-    <string name="cancel">Cancelar</string>
-    <string name="confirm">Confirmar</string>
-    <string name="ok" translatable="false">Ok</string>
-    <string name="week_range_format">%s até %s</string>
-    <string name="default_job_name">Trabalho</string>
+    <string name="delete_day_prompt_title">Delete</string>
+    <string name="list_screen_title">Hours</string>
+    <string name="delete_day_prompt_description">Are you sure you want to delete %s?</string>
+    <string name="hello_user">Hello, %s.</string>
+    <string name="week">Week</string>
+    <string name="select_date">Select a date</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="week_range_format">%s to %s</string>
 </resources>
