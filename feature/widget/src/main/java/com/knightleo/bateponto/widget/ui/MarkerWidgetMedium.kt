@@ -124,14 +124,18 @@ private fun Item(
     index: Int,
     timeMark: TimeMark
 ) {
-    val style = if (index == 0) WidgetTypography.normalText.copy(
-        fontStyle = FontStyle.Italic
-    )
-    else WidgetTypography.normalText
-    Text(
-        timeMark.timeStamp.formattedTime(),
-        style = style,
-    )
+    if (index == 0) {
+        Text(
+            " \u2022 ${timeMark.timeStamp.formattedTime()}",
+            style = WidgetTypography.normalText.copy(fontStyle = FontStyle.Italic)
+        )
+    } else {
+        Text(
+            timeMark.timeStamp.formattedTime(),
+            style = WidgetTypography.normalText,
+        )
+    }
+
 }
 
 @Composable
@@ -145,30 +149,23 @@ private fun BreakPeriod(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.Start,
-        modifier = GlanceModifier.fillMaxWidth().then(modifier)
+        modifier = GlanceModifier.then(modifier)
     ) {
         if (index % 2 == currentTimes.size % 2) {
             Image(
                 ImageProvider(R.drawable.rounded_arrow_right_24),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    GlanceTheme.colors.primary
-                )
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.primary)
             )
         } else {
             Image(
                 ImageProvider(R.drawable.rounded_arrow_left_24),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    GlanceTheme.colors.tertiary
-                )
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiary)
             )
         }
         Text(
-            text = Duration.between(
-                next.timeStamp,
-                timeMark.timeStamp
-            ).formatted(),
+            text = Duration.between(next.timeStamp, timeMark.timeStamp).formatted(),
             style = WidgetTypography.subText
         )
     }

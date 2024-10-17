@@ -5,6 +5,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
+import androidx.glance.layout.fillMaxSize
 import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.preview.Preview
 import com.knightleo.bateponto.widget.data.State
@@ -21,12 +22,16 @@ internal fun SmallContent(
     Box(
         contentAlignment = Alignment.Center,
         modifier = GlanceModifier
+            .fillMaxSize()
             .background(currentState.backgroundColor)
             .then(modifier)
     ) {
         when (currentState) {
             State.NO_USER -> NoUser(updateUser = updateUser)
-            else -> AddTimeButton(onClick = onAddTime)
+            else -> AddTimeButton(
+                onClick = onAddTime,
+                modifier = GlanceModifier.fillMaxSize()
+            )
         }
     }
 }
