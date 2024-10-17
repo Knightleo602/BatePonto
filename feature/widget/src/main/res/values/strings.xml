@@ -7,4 +7,5 @@
     <string name="spent_today_format_1s">Worked today: %s</string>
     <string name="label_widget_small">Time marker Small</string>
     <string name="label_widget_medium">Time marker medium</string>
+    <string name="open_in_new_description">Open in App</string>
 </resources>

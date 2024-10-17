@@ -25,6 +25,7 @@ import com.knightleo.bateponto.widget.data.MarkerDataHelper.getTodayTimes
 import com.knightleo.bateponto.widget.data.MarkerDataHelper.toTimeMarkList
 import com.knightleo.bateponto.widget.data.MarkerDataHelper.updateUser
 import com.knightleo.bateponto.widget.data.State
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -37,8 +38,8 @@ class MarkerWidget : GlanceAppWidget() {
     private val userIdKey = intPreferencesKey("user_id")
 
     companion object {
-        private val SMALL_BTN = DpSize(80.dp, 80.dp)
-        private val MEDIUM_TIMES = DpSize(130.dp, 100.dp)
+        internal val SMALL_BTN = DpSize(80.dp, 80.dp)
+        internal val MEDIUM_TIMES = DpSize(130.dp, 100.dp)
     }
 
     override val sizeMode: SizeMode = SizeMode.Responsive(
@@ -92,6 +93,7 @@ class MarkerWidget : GlanceAppWidget() {
             val currentSize = LocalSize.current
             val addTime = { addTime(context, state.userId ?: 0) }
             val updateUser = { updateUser(context) }
+            Napier.i { "State is $state" }
             WidgetTheme {
                 Box(
                     contentAlignment = Alignment.Center
@@ -102,7 +104,7 @@ class MarkerWidget : GlanceAppWidget() {
                             state.userId!!
                         )
                         MediumContent(
-                            currentTimes = state.times.orEmpty(),
+                            times = state.times.orEmpty(),
                             currentState = state.state ?: State.LOADING,
                             onAddTime = addTime,
                             updateUser = updateUser

@@ -21,7 +21,7 @@ import java.time.OffsetTime
 abstract class DayMarkDAO {
 
     @Transaction
-    @Query("SELECT * FROM DayMark WHERE userId=:userId AND day BETWEEN :from AND :to")
+    @Query("SELECT * FROM DayMark WHERE userId=:userId AND day BETWEEN :from AND :to ORDER BY day DESC")
     abstract suspend fun getDaysBetween(
         userId: Int,
         from: Day,

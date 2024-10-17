@@ -2,7 +2,6 @@ package com.knightleo.bateponto.widget.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
@@ -10,6 +9,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.components.SquareIconButton
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
@@ -25,9 +25,8 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.preview.Preview
+import androidx.glance.text.FontStyle
 import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.domain.formatted
 import com.knightleo.bateponto.domain.formattedTime
@@ -42,16 +41,16 @@ import java.time.Duration
 @Preview
 @Composable
 internal fun MediumContent(
-    currentTimes: List<TimeMark>,
-    currentState: State = State.LOADING,
+    times: List<TimeMark>,
     modifier: GlanceModifier = GlanceModifier,
+    currentState: State = State.LOADING,
     onAddTime: () -> Unit = {},
-    updateUser: () -> Unit = {}
+    updateUser: () -> Unit = {},
 ) {
+    val currentTimes = times.reversed()
     val context = LocalContext.current
     val padding = 13.dp
     val itemPadding = 6.dp
-    val textStyle = TextStyle(color = GlanceTheme.colors.onBackground)
     Column(
         modifier = GlanceModifier
             .background(GlanceTheme.colors.widgetBackground)
@@ -67,70 +66,47 @@ internal fun MediumContent(
             Text(
                 text = context.resources.getString(
                     R.string.spent_today_format_1s,
-                    currentTimes.timeSpent.formatted()
+                    times.timeSpent.formatted()
                 ),
-                style = TextStyle(color = GlanceTheme.colors.onSurface)
+                style = WidgetTypography.normalText
             )
         }
-        when (currentState) {
-            State.NO_USER -> NoUser(updateUser = updateUser)
-            else -> {
-                Napier.i { "Showing ${currentTimes.size} items" }
-                Box {
-                    LazyColumn(
-                        modifier = GlanceModifier.fillMaxWidth().padding(start = padding)
+        Napier.i { "Showing ${currentTimes.size} items on state $currentState" }
+        Box {
+            LazyColumn {
+                item {
+                    Spacer(modifier = GlanceModifier.height(padding))
+                }
+                itemsIndexed(currentTimes) { index, timeMark ->
+                    val next = currentTimes.getOrNull(index + 1)
+                    Column(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = GlanceModifier.padding(start = padding).fillMaxWidth()
                     ) {
-                        item {
-                            Spacer(modifier = GlanceModifier.height(itemPadding))
-                        }
-                        itemsIndexed(currentTimes) { index, timeMark ->
-                            val next = currentTimes.getOrNull(index + 1)
-                            Column {
-                                Text(
-                                    timeMark.timeStamp.formattedTime(),
-                                    style = textStyle
-                                )
-                                if (next != null) Row {
-                                    if (index % 2 == 0) {
-                                        Image(
-                                            ImageProvider(R.drawable.rounded_arrow_right_24),
-                                            contentDescription = null,
-                                            colorFilter = ColorFilter.tint(
-                                                ColorProvider(
-                                                    Color(context.getColor(R.color.arrow_green))
-                                                )
-                                            )
-                                        )
-                                    } else {
-                                        Image(
-                                            ImageProvider(R.drawable.rounded_arrow_left_24),
-                                            contentDescription = null,
-                                            colorFilter = ColorFilter.tint(
-                                                ColorProvider(
-                                                    Color(context.getColor(R.color.arrow_red))
-                                                )
-                                            )
-                                        )
-                                    }
-                                    Text(
-                                        text = Duration.between(
-                                            timeMark.timeStamp,
-                                            next.timeStamp
-                                        ).formatted(),
-                                        style = textStyle
-                                    )
-                                }
-                            }
-                        }
-                        item {
-                            Spacer(modifier = GlanceModifier.height(itemPadding))
+                        Item(index, timeMark)
+                        if (next != null) {
+                            BreakPeriod(
+                                index,
+                                currentTimes,
+                                next,
+                                timeMark
+                            )
                         }
                     }
-                    Box(
-                        modifier = GlanceModifier.fillMaxSize()
-                            .padding(bottom = padding, end = padding + 3.dp),
-                        contentAlignment = Alignment.BottomEnd
-                    ) {
+                }
+                item {
+                    Spacer(modifier = GlanceModifier.height(padding))
+                }
+            }
+            Box(
+                modifier = GlanceModifier.fillMaxSize()
+                    .padding(bottom = padding, end = padding),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                when (currentState) {
+                    State.NO_USER -> NoUser(updateUser = updateUser)
+                    State.LOADING -> CircularProgressIndicator()
+                    else -> {
                         SquareIconButton(
                             imageProvider = ImageProvider(R.drawable.outline_more_time_24),
                             contentDescription = context.getString(R.string.add_new_time_description),
@@ -143,6 +119,61 @@ internal fun MediumContent(
     }
 }
 
+@Composable
+private fun Item(
+    index: Int,
+    timeMark: TimeMark
+) {
+    val style = if (index == 0) WidgetTypography.normalText.copy(
+        fontStyle = FontStyle.Italic
+    )
+    else WidgetTypography.normalText
+    Text(
+        timeMark.timeStamp.formattedTime(),
+        style = style,
+    )
+}
+
+@Composable
+private fun BreakPeriod(
+    index: Int,
+    currentTimes: List<TimeMark>,
+    next: TimeMark,
+    timeMark: TimeMark,
+    modifier: GlanceModifier = GlanceModifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.Start,
+        modifier = GlanceModifier.fillMaxWidth().then(modifier)
+    ) {
+        if (index % 2 == currentTimes.size % 2) {
+            Image(
+                ImageProvider(R.drawable.rounded_arrow_right_24),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    GlanceTheme.colors.primary
+                )
+            )
+        } else {
+            Image(
+                ImageProvider(R.drawable.rounded_arrow_left_24),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    GlanceTheme.colors.tertiary
+                )
+            )
+        }
+        Text(
+            text = Duration.between(
+                next.timeStamp,
+                timeMark.timeStamp
+            ).formatted(),
+            style = WidgetTypography.subText
+        )
+    }
+}
+
 @SuppressLint("RestrictedApi")
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
@@ -150,6 +181,6 @@ internal fun MediumContent(
 internal fun MediumContentWidgetPreview() {
     MediumContent(
         emptyList(),
-        State.OK
+        currentState = State.OK,
     )
 }

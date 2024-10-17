@@ -7,4 +7,5 @@
     <string name="spent_today_format_1s">Trabalhado hoje: %s</string>
     <string name="label_widget_small">Bater ponto Pequeno</string>
     <string name="label_widget_medium">Bater ponto medio</string>
+    <string name="open_in_new_description">Abrir no App</string>
 </resources>

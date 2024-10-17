@@ -53,7 +53,7 @@ fun ListScreen(
                     viewModel.refresh()
                 }
 
-                Lifecycle.Event.ON_PAUSE -> {
+                Lifecycle.Event.ON_STOP -> {
                     viewModel.updateWidget()
                 }
 
