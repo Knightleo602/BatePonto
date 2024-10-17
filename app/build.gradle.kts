@@ -10,11 +10,11 @@ plugins {
 
 android {
     namespace = "com.knightleo.bateponto"
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.knightleo.bateponto"
-        minSdk = 26
+        minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 35
         versionCode = 102
         versionName = "v1.0.2"
@@ -43,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -55,6 +56,10 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":feature:widget"))
+    implementation(project(":core:data"))
+    implementation(project(":core:domain"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -72,12 +77,12 @@ dependencies {
 
     implementation(libs.napier)
 
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.runtime)
-
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
+    implementation(libs.koin.workmanager)
 
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
