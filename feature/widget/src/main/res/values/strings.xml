@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title">Add Time Mark</string>
+    <string name="mark_new">Add Time Mark</string>
     <string name="no_user">There is no connected user</string>
     <string name="no_user_description">No user</string>
     <string name="add_new_time_description">Add new time</string>
     <string name="spent_today_format_1s">Worked today: %s</string>
+    <string name="label_widget_small">Time marker Small</string>
+    <string name="label_widget_medium">Time marker medium</string>
 </resources>

@@ -1,8 +1,10 @@
-package com.knightleo.bateponto.widget
+package com.knightleo.bateponto.widget.data
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import com.knightleo.bateponto.data.entity.TimeMark
+import com.knightleo.bateponto.widget.ui.MarkerWidget
+import com.knightleo.bateponto.widget.ui.dataStore
 
 interface MarkerWidgetUpdater {
     suspend fun updateAll()
@@ -22,5 +24,4 @@ internal class MarkerWidgetUpdaterImpl(
             context.dataStore.updateDayMarks(list)
         }
     }
-
 }

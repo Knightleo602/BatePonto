@@ -75,11 +75,12 @@ data class TimeMark(
     @PrimaryKey val timeStamp: OffsetTime,
     @ColumnInfo(index = true) val day: Day
 ) {
-    override fun toString(): String = "${OffsetTimeConverter().offsetToString(timeStamp)}-$day"
+    override fun toString(): String = "${OffsetTimeConverter().offsetToString(timeStamp)}$SPLIT$day"
 
     companion object {
+        private const val SPLIT = "///"
         fun String.asTimeMark(): TimeMark {
-            val s = split('-')
+            val s = split(SPLIT)
             return TimeMark(
                 timeStamp = OffsetTimeConverter().stringToOffset(s[0]),
                 day = s[1].asDay()

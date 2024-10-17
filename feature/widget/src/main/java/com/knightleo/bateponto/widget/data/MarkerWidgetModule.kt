@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.widget
+package com.knightleo.bateponto.widget.data
 
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker

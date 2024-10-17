@@ -10,7 +10,8 @@ import com.knightleo.bateponto.data.entity.TimeMark
 import com.knightleo.bateponto.data.entity.User
 import com.knightleo.bateponto.data.repository.PreferencesRepository
 import com.knightleo.bateponto.data.today
-import com.knightleo.bateponto.widget.MarkerWidgetUpdater
+import com.knightleo.bateponto.widget.data.MarkerWidgetUpdater
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,6 +123,9 @@ class DayListViewModel(
 
     fun updateWidget() = coroutineLaunch {
         val todayMarks = dayMarkDAO.getWorkTimesInDay(user.id, today())
+        Napier.i {
+            "Updating widget with ${todayMarks.size} marks: $todayMarks"
+        }
         widgetUpdater.updateTimeMarks(todayMarks)
         widgetUpdater.updateAll()
     }

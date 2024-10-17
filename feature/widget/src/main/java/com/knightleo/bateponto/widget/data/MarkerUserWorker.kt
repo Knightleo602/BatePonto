@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.widget
+package com.knightleo.bateponto.widget.data
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -10,6 +10,8 @@ import androidx.work.WorkerParameters
 import com.knightleo.bateponto.data.DayMarkDAO
 import com.knightleo.bateponto.data.repository.PreferencesRepository
 import com.knightleo.bateponto.data.today
+import com.knightleo.bateponto.widget.ui.MarkerWidget
+import com.knightleo.bateponto.widget.ui.dataStore
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -45,15 +47,11 @@ class MarkerUserWorker(
     parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters), KoinComponent {
     private val preferences: PreferencesRepository by inject()
-    override suspend fun doWork(): Result {
-        Napier.i(tag = "UserWorker") {
-            "Fetching active user"
-        }
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        Napier.i(tag = "UserWorker") { "Fetching active user" }
         val userId = preferences.activeUserid.first()
-        Napier.i(tag = "UserWorker") {
-            "User fetched: $userId"
-        }
-        return MarkerWidget().run {
+        Napier.i(tag = "UserWorker") { "User fetched: $userId" }
+        MarkerWidget().run {
             if (userId != null) {
                 applicationContext.dataStore.updateState(State.OK)
                 applicationContext.dataStore.setUserId(userId)
@@ -75,9 +73,7 @@ class MarkerAddWorker(
     private val dayMarkDao: DayMarkDAO by inject()
     private val userId = inputData.getInt(USER_ID_KEY, 0)
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        Napier.i(tag = "AddWorker") {
-            "Adding new mark"
-        }
+        Napier.i(tag = "AddWorker") { "Adding new mark" }
         dayMarkDao.insertCurrentTimeStamp(userId)
         val times = dayMarkDao.getWorkTimesInDay(userId, today())
         MarkerWidget().run {
@@ -85,9 +81,7 @@ class MarkerAddWorker(
             applicationContext.dataStore.updateDayMarks(times)
             updateAll(applicationContext)
         }
-        Napier.i(tag = "AddWorker") {
-            "New mark added"
-        }
+        Napier.i(tag = "AddWorker") { "New mark added" }
         Result.success()
     }
 }
@@ -97,19 +91,15 @@ class MarkerFetchTimesWorker(
     parameters: WorkerParameters
 ) : CoroutineWorker(context, parameters), KoinComponent {
     private val dayMarkDao: DayMarkDAO by inject()
-    private val userId: Int = inputData.getInt(USER_ID_KEY, 0)
-    override suspend fun doWork(): Result {
-        Napier.i {
-            "Fetching marks"
-        }
+    private val userId: Int = inputData.getInt(USER_ID_KEY, 2)
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        Napier.i { "Fetching marks" }
         val times = dayMarkDao.getWorkTimesInDay(userId, today())
-        Napier.i {
-            "Marks fetched: $times"
-        }
+        Napier.i { "Marks fetched: $times" }
         MarkerWidget().run {
             applicationContext.dataStore.updateDayMarks(times)
             updateAll(applicationContext)
         }
-        return Result.success()
+        Result.success()
     }
 }

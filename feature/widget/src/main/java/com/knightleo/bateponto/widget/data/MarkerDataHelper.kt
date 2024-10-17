@@ -1,12 +1,17 @@
-package com.knightleo.bateponto.widget
+package com.knightleo.bateponto.widget.data
 
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.knightleo.bateponto.data.entity.TimeMark
+import com.knightleo.bateponto.data.entity.TimeMark.Companion.asTimeMark
+import io.github.aakira.napier.Napier
 
 object MarkerDataHelper {
+
+    private const val TIME_SPLITTER = "|||"
 
     fun addTime(context: Context, currentUserId: Int) {
         val worker = OneTimeWorkRequestBuilder<MarkerAddWorker>()
@@ -37,5 +42,19 @@ object MarkerDataHelper {
             ExistingWorkPolicy.REPLACE,
             worker
         )
+    }
+
+    internal fun List<TimeMark>?.asString(): String = if(isNullOrEmpty()) ""
+    else StringBuilder().apply {
+        this@asString.forEachIndexed { i, time ->
+            append(time.toString())
+            if(i < this@asString.lastIndex) append(TIME_SPLITTER)
+        }
+    }.toString()
+
+    internal fun String?.toTimeMarkList(): List<TimeMark> = if (isNullOrBlank()) emptyList()
+    else {
+        Napier.d(tag = "Widget") { "Reading string: $this" }
+        split(TIME_SPLITTER).map { s -> s.asTimeMark() }
     }
 }

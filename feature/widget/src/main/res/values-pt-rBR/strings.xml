@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title">Bater Ponto</string>
+    <string name="mark_new">Bater Ponto</string>
     <string name="no_user">Não há um usuário conectado</string>
     <string name="no_user_description">Sem usuário</string>
     <string name="add_new_time_description">Bater ponto</string>
     <string name="spent_today_format_1s">Trabalhado hoje: %s</string>
+    <string name="label_widget_small">Bater ponto Pequeno</string>
+    <string name="label_widget_medium">Bater ponto medio</string>
 </resources>

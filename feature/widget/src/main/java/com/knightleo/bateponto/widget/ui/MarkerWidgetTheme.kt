@@ -1,4 +1,4 @@
-package com.knightleo.bateponto.widget
+package com.knightleo.bateponto.widget.ui
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme

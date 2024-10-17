@@ -3,7 +3,7 @@ package com.knightleo.bateponto
 import android.app.Application
 import com.knightleo.bateponto.data.dataModule
 import com.knightleo.bateponto.ui.screens.screensModule
-import com.knightleo.bateponto.widget.widgetModule
+import com.knightleo.bateponto.widget.data.widgetModule
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import org.koin.android.ext.koin.androidContext
